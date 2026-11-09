@@ -1,0 +1,53 @@
+/* admin preview */
+.adm{background:#F3F4F6;min-height:100vh;padding-bottom:0}
+.adm-top{background:var(--navy);color:#fff;min-height:58px;display:flex;align-items:center;justify-content:space-between;padding:8px 18px;gap:12px}
+.adm-top .brand{color:#fff}
+.adm-top .brand b{color:#fff;font-size:1rem}
+.adm-top .logo{height:38px}
+.adm-top .who{font-size:.86rem;color:#cfd9ec}
+.adm-body{display:grid}
+@media(min-width:900px){.adm-body{grid-template-columns:230px 1fr}}
+.adm-side{background:#fff;border-right:1px solid var(--line);display:flex;overflow-x:auto;padding:0}
+@media(min-width:900px){.adm-side{display:block;padding:14px 0;min-height:calc(100vh - 100px)}}
+.adm-side a{display:block;padding:12px 18px;color:var(--ink);text-decoration:none;font-weight:500;white-space:nowrap;border-left:3px solid transparent}
+.adm-side a.on{background:var(--tint);border-left-color:var(--primary);color:var(--primary)}
+.adm-main{padding:24px 18px 40px;min-width:0}
+@media(min-width:900px){.adm-main{padding:32px 36px 48px}}
+.adm-main h1{font-size:1.6rem;margin-bottom:.2em}
+.adm-main .sub{color:var(--muted);margin-bottom:24px}
+.acard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:18px;overflow-x:auto}
+.acard h3{font-size:1.02rem;margin-bottom:12px}
+.qa{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px}
+@media(min-width:900px){.qa{grid-template-columns:repeat(3,1fr)}}
+.qa a{display:block;background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px;text-decoration:none;color:var(--ink)}
+.qa a:hover{border-color:var(--primary)}
+.qa i{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--tint);color:var(--primary);font:600 1rem var(--font);font-style:normal;margin-bottom:10px}
+.qa b{display:block}
+.qa small{color:var(--muted)}
+.tbl{width:100%;border-collapse:collapse;font-size:.93rem}
+.tbl th,.tbl td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+.tbl th{font-size:.78rem;color:var(--muted);font-weight:600}
+.st{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.78rem;font-weight:600}
+.st.ok{background:#dff3e4;color:#17612b}
+.st.dr{background:#FFF1CC;color:#7a5200}
+.adm-split{display:grid;gap:18px}
+@media(min-width:1000px){.adm-split{grid-template-columns:1.7fr 1fr}}
+.toolbar{display:flex;flex-wrap:wrap;gap:4px;border:1px solid #cfd6e2;border-bottom:0;padding:6px;background:#F7F8FA;border-radius:6px 6px 0 0}
+.toolbar span{min-width:34px;height:34px;padding:0 6px;display:grid;place-items:center;border-radius:4px;font-weight:600;background:#fff;border:1px solid var(--line)}
+.editor{border:1px solid #cfd6e2;min-height:170px;padding:14px;background:#fff;color:var(--muted);border-radius:0 0 6px 6px}
+.drop{border:2px dashed #b8c0d0;border-radius:8px;padding:26px 14px;text-align:center;color:var(--muted);background:#FAFBFD}
+.drop b{display:block;color:var(--ink)}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.switch i{width:44px;height:24px;border-radius:99px;background:#2e8b4f;position:relative}
+.switch i::after{content:"";position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff}
+.serp{border:1px solid var(--line);border-radius:8px;padding:14px;background:#fff}
+.serp b{display:block;color:#1a0dab;font:400 1.1rem Arial,sans-serif}
+.serp small{color:#006621;display:block;font-family:Arial,sans-serif}
+.serp span{color:#4d5156;font:.88rem Arial,sans-serif}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.login{min-height:calc(100vh - 34px);display:grid;place-items:center;padding:24px;background:var(--navy)}
+.login .box{background:#fff;padding:34px 28px;width:100%;max-width:400px;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.login .logo{height:92px;margin:0 auto 14px}
+.login h1{font-size:1.5rem;text-align:center;margin-bottom:.2em}
+.login p.s{text-align:center;color:var(--muted);margin-bottom:22px}
+
