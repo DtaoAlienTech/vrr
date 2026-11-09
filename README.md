@@ -25,6 +25,7 @@ Open **http://localhost:3000**. The first start takes a few minutes: the images 
 | `vrr-frontend` | The Next.js website. Builds its pages from the API when it starts (the build is saved in a volume) |
 | `vrr-backend` | The FastAPI API. Applies database migrations and, on an empty database, adds the starter content |
 | `vrr-db` | PostgreSQL (data is kept in a Docker volume) |
+| `vrr-mailcatcher` | Optional (`--profile mail`): a test mailbox that prints enquiry emails, see "Try the enquiry email" |
 
 Useful commands:
 
@@ -45,6 +46,19 @@ docker compose exec backend python -m app.cli media-reprocess     # resized copi
 docker compose exec backend python -m app.cli media-cleanup --dry-run   # list files no library entry refers to (drop --dry-run to delete them)
 ``` The starter content is added only when the database has no pages (`SEED_ON_START=0` in `.env` turns that off; `docker compose exec backend python -m app.cli seed --if-empty` runs it by hand). The texts marked "Sample" in it are placeholders and must be replaced before launch.
 
+### Test the whole site on your computer
+
+1. `cp .env.example .env`, replace every `CHANGE_ME` (see "Secrets"), then `docker compose up -d --build` and wait until `docker compose ps` shows all four containers healthy.
+2. Public site: **http://localhost:3000** (home, courses, faculty, news, gallery, admissions, contact, privacy). Try the phone view too (browser dev tools, narrow window).
+3. Create your admin (below), then sign in at **http://localhost:3000/admin**.
+4. Try these, and check each one on the public site in a second tab:
+   - **News and notices:** add a news item, publish it, then change its web address (slug). The old address now sends visitors to the new one.
+   - **Draft preview:** open any page or news item, press **Preview**. It opens the saved draft in a new tab with an orange "Draft preview" bar; the link stops working after 30 minutes and is never shown to search engines.
+   - **Page content:** change a heading or a photo on any page, hide or move a section, then press **Save**. The public page updates within seconds. **History** on the same screen puts an older version back.
+   - **Photos:** upload a photo in the media library (big camera photos are resized automatically).
+   - **Enquiry:** fill in the enquiry form on the public site, then look under **Enquiries** in the admin panel. To also see the email, follow "Try the enquiry email".
+5. Start again from a clean site whenever you like: `docker compose down -v && docker compose up -d --build` (this deletes the database and uploads).
+
 ### First admin account
 
 Create the first super admin once (it asks for the password on the keyboard; it is never stored in clear text):
@@ -55,6 +69,41 @@ docker compose exec backend python -m app.cli reset-password --email you@college
 ```
 
 Passwords need at least 12 characters. Super admins must turn on two-factor login (an authenticator app) the first time they sign in; five wrong passwords lock an account for 15 minutes.
+
+### The admin panel
+
+Open **http://localhost:3000/admin** and sign in with the account you created above. Super admins are asked to set up two-factor login (an authenticator app) the first time. From there staff can publish news and notices, add activities with many photos at once, manage the gallery, courses, faculty and enquiries, and change the text and photos of every page of the website (Page content). Super admins also manage site settings (menu, footer, contact details, search-engine defaults), users and the activity log. Every change shows on the website within seconds, is kept in the history and can be undone.
+
+The admin screens are built from the backend's own definitions of every form, so a new field added in the backend appears in the admin by itself. Browser tests for the main flows are in `frontend/e2e/` (see its README).
+
+### Old addresses, draft preview and email
+
+- **Old addresses keep working.** When an editor changes the address (slug) of a page, course or news item, the old address is saved as a redirect and the website answers it with a real `301` to the new one (Google follows it and old links do not break). Redirects can also be added by hand under **History > Redirects**. The website checks the list on every visit to a public address, keeps it for at most 30 seconds, and ignores any rule that would leave the site.
+- **Draft preview.** **Preview** (on page and news screens) asks the backend for a signed link, `/preview/<token>`. The token is valid for 30 minutes, opens exactly one page or news item for reading, and shows the saved version (not unsaved edits) in the real website layout. The answer is never cached and carries `noindex`.
+- **The website's API types are generated** from the backend's own schema, so the two cannot drift apart. After changing a public response model (`backend/app/schemas/public.py`) run `./scripts/generate-types.sh`; `./scripts/check.sh` fails if you forgot.
+
+### Try the enquiry email
+
+Enquiries are always saved in the database; the email to the college office is an extra. Two ways to try it:
+
+**A. Without any account (local test mailbox).** Put this in `.env`, then start the mailbox and restart the backend:
+
+```bash
+SMTP_HOST=mailcatcher
+SMTP_PORT=1025
+SMTP_SECURITY=none
+ENQUIRY_TO_EMAIL=office@example.org
+MAIL_FROM=website@example.org
+
+docker compose --profile mail up -d mailcatcher
+docker compose up -d backend
+docker compose exec backend python -m app.cli send-test-email   # prints "Sent."
+docker compose logs -f mailcatcher                              # every email appears here
+```
+
+Now submit the enquiry form on the website: the email shows in the `mailcatcher` log. (The mailbox has no encryption and no login: it is only for this test, and it has no published port.)
+
+**B. With the real mail account.** Fill `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` and `ENQUIRY_TO_EMAIL` in `.env`. Port 587 uses `SMTP_SECURITY=starttls`, port 465 uses `ssl`. Gmail and Microsoft need an *app password*, not the normal one. Then `docker compose up -d backend` and run `send-test-email` as above: it says exactly what went wrong (wrong password, wrong port, server not reachable) in plain words. A password is never sent without encryption.
 
 ### Staff API (what the admin panel uses)
 
@@ -110,6 +159,6 @@ npm run dev                     # http://localhost:3000 (/api is proxied to port
 ## Rules
 
 - No secrets in git. `.env` is ignored.
-- Each content field is defined once in the backend schema; the admin form and the TypeScript types are generated from it.
+- Each content field is defined once in the backend schema; the admin forms and the website's API types (`frontend/src/lib/content/api.generated.ts`) are generated from it.
 - Only the `JsonLd` component may write raw HTML. Rich text is data, drawn by React.
 - Behind a proxy the backend trusts only the address the proxy adds (`TRUSTED_PROXY_HOPS`), never the one the visitor sends.

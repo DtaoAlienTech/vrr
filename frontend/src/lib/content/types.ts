@@ -1,18 +1,14 @@
-// Shapes of the content that the admin edits. In Phase 1 the backend defines the same shapes
-// once (Pydantic) and these types are generated from its OpenAPI schema.
+// The website's content types. Most of them come straight from the backend's API schema
+// (./api.generated.ts, written by ./scripts/generate-types.sh), so they cannot drift from the API.
+// Only what the API sends as free-form data is described here: the rich-text document, the page
+// sections (20 block types) and the page keys. A check at the bottom proves the sections still fit
+// the API's section shape, and backend/tests/test_blocks.py checks the block list.
+import type * as Api from "./api.generated";
 
-export type MediaVariant = { url: string; width: number };
-export type MediaRef = {
-  url: string;
-  alt: string;
-  width: number;
-  height: number;
-  variants?: MediaVariant[];
-  /** Hide a camera date stamp burned into the bottom edge of the photo. */
-  cropBottom?: boolean;
-};
-export type LinkItem = { label: string; href: string };
-export type DocItem = { title: string; note?: string; href?: string };
+export type MediaVariant = Api.MediaVariantOut;
+export type MediaRef = Api.MediaOut;
+export type LinkItem = Api.Link;
+export type DocItem = Api.DocItem;
 
 // ---- Rich text: restricted editor JSON, drawn by React (never inserted as HTML) ----
 export type RichMark = { type: string; attrs?: { href?: string } };
@@ -25,35 +21,7 @@ export type RichNode = {
 };
 export type RichDoc = { type: "doc"; content: RichNode[] };
 
-export type SiteSettings = {
-  name: string;
-  shortName: string;
-  tagline: string;
-  established: number;
-  topBar: string;
-  logo: MediaRef;
-  contact: {
-    address: string;
-    phone: string;
-    whatsapp: string;
-    email: string;
-    hours: string;
-    mapLink: string;
-    /** A Google Maps "embed" address (https://www.google.com/maps/embed?...). */
-    mapEmbedUrl: string;
-  };
-  social: LinkItem[];
-  menu: LinkItem[];
-  footerCourses: LinkItem[];
-  affiliationText: string;
-  copyright: string;
-  seo: {
-    defaultTitle: string;
-    titleTemplate: string;
-    description: string;
-    ogImage: MediaRef;
-  };
-};
+export type SiteSettings = Api.SettingsOut;
 
 // ---- Page sections (reusable blocks) ----
 
@@ -168,74 +136,30 @@ export type PageKey =
   | "contact"
   | "privacy";
 
-export type PageSeo = {
-  title: string;
-  description: string;
-  ogImage?: MediaRef;
-  noindex?: boolean;
-};
+export type PageSeo = Api.PageSeoOut;
 /** `slug` is the URL path without the leading slash ("" for the home page). */
-export type PageData = {
+export type PageData = Omit<Api.PageOut, "key" | "sections"> & {
   key: PageKey;
-  slug: string;
-  title: string;
-  seo: PageSeo;
   sections: Section[];
 };
 
 // ---- Structured collections ----
 
-export type Course = {
-  slug: string;
-  tab: string;
-  name: string;
-  department: string;
-  duration: string;
-  affiliation?: string;
-  summary: string;
-  description?: RichDoc;
-  subjects?: string[];
-  eligibility?: string;
-  seats?: string;
-  fees?: string;
-  syllabus?: DocItem;
-};
-export type ActivityPhoto = { media: MediaRef; caption?: string };
-export type Activity = {
-  slug: string;
-  group: string;
-  groupKey: string;
-  year?: string;
-  title: string;
-  summary: string;
-  cover: MediaRef;
-  photos: ActivityPhoto[];
-};
-export type NewsItem = {
-  slug: string;
-  title: string;
-  category: string;
-  /** ISO date, YYYY-MM-DD */
-  publishedAt: string;
-  summary: string;
-  body: RichDoc;
-  pinned?: boolean;
-  attachments: DocItem[];
-  cover?: MediaRef;
-};
-export type FacultyMember = {
-  id: number;
-  name: string;
-  designation: string;
-  qualification: string;
-  department: string;
-  departmentKey: string;
-  photo?: MediaRef;
-};
-export type GalleryItem = {
-  id: number;
-  media: MediaRef;
-  caption: string;
-  category: string;
-  categoryLabel: string;
-};
+export type Course = Omit<Api.CourseOut, "description"> & { description?: RichDoc };
+export type ActivityPhoto = Api.ActivityPhotoOut;
+export type Activity = Api.ActivityOut;
+/** `publishedAt` is an ISO date, YYYY-MM-DD. */
+export type NewsItem = Omit<Api.NewsOut, "body"> & { body: RichDoc };
+export type FacultyMember = Api.FacultyOut;
+export type GalleryItem = Api.GalleryOut;
+
+/** What the draft preview address returns: one page or one news item, whatever its status. */
+export type PreviewData = { kind: "page"; page: PageData } | { kind: "news"; news: NewsItem };
+
+// ---- Compile-time guard: a mistake here fails `npm run typecheck` ----
+
+type Assert<T extends true> = T;
+/** Every section the website knows must still be a valid answer of the API's section shape. */
+export type SectionsFitTheApi = Assert<Section extends Api.SectionOut ? true : false>;
+/** A preview is one of the two answers the API can give. */
+export type PreviewFitsTheApi = Assert<PreviewData extends Api.PreviewOut ? true : false>;

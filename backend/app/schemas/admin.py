@@ -17,11 +17,14 @@ from app.models.enums import (
 )
 from app.schemas.common import (
     CamelModel,
+    DepartmentId,
     Email,
     Id,
+    ImageId,
     Line,
     LongSummary,
     Para,
+    PdfId,
     RichDoc,
     SeoDescription,
     SeoTitle,
@@ -52,19 +55,24 @@ class MediaBrief(AdminOut):
 
 
 class NewsAttachmentIn(CamelModel):
-    media_id: Id
+    media_id: PdfId
     label: Short
 
 
 class NewsIn(CamelModel):
     title: Line
-    slug: Slug | None = None  # left out: made from the title (create) or kept (update)
+    slug: Slug | None = Field(
+        default=None,
+        description="The last part of the web address. Leave empty to make it from the title.",
+    )
     category: NewsCategory
-    summary: Summary
+    summary: Summary = Field(description="One or two sentences shown in the list and on Google.")
     body: RichDoc
-    cover_media_id: Id | None = None
-    published_at: AwareDatetime | None = None  # left out: now
-    is_pinned: bool = False
+    cover_media_id: ImageId | None = None
+    published_at: AwareDatetime | None = Field(
+        default=None, description="The date shown. Leave empty to use the moment of saving."
+    )
+    is_pinned: bool = Field(default=False, description="Keep it at the top of the list.")
     status: PublishStatus = PublishStatus.DRAFT
     seo_title: SeoTitle | None = None
     seo_description: SeoDescription | None = None
@@ -98,7 +106,7 @@ class NewsAdminOut(AdminOut):
 
 
 class ActivityPhotoIn(CamelModel):
-    media_id: Id
+    media_id: ImageId
     caption: Line | None = None
 
 
@@ -108,14 +116,16 @@ class ActivityIn(CamelModel):
     group: ActivityGroup
     year: int | None = Field(default=None, ge=1990, le=2100, strict=True)
     summary: LongSummary
-    cover_media_id: Id | None = None
-    show_on_home: bool = False
+    cover_media_id: ImageId | None = Field(
+        default=None, description="Leave empty to use the first photo."
+    )
+    show_on_home: bool = Field(default=False, description="Also show it on the home page.")
     status: PublishStatus = PublishStatus.DRAFT
     sort_order: int = Field(default=0, ge=0, le=100000)
     photos: list[ActivityPhotoIn] = Field(default_factory=list, max_length=80)
 
 
-class ActivityPhotoOut(AdminOut):
+class ActivityPhotoAdminOut(AdminOut):
     media: MediaBrief | None = None
     caption: str | None = None
 
@@ -131,7 +141,7 @@ class ActivityAdminOut(AdminOut):
     show_on_home: bool
     status: str
     sort_order: int
-    photos: list[ActivityPhotoOut]
+    photos: list[ActivityPhotoAdminOut]
     created_at: datetime
     updated_at: datetime
 
@@ -143,7 +153,7 @@ _YOUTUBE = re.compile(r"^[A-Za-z0-9_-]{6,20}$")
 
 class GalleryIn(CamelModel):
     kind: GalleryKind = GalleryKind.PHOTO
-    media_id: Id | None = None
+    media_id: ImageId | None = None
     youtube_id: str | None = Field(default=None, max_length=20, pattern=_YOUTUBE.pattern)
     category: GalleryCategory = GalleryCategory.CAMPUS
     caption: str = Field(default="", max_length=200)
@@ -189,7 +199,7 @@ class DepartmentAdminOut(AdminOut):
 
 
 class CourseIn(CamelModel):
-    department_id: Id
+    department_id: DepartmentId
     name: Line
     tab: Short
     slug: Slug | None = None
@@ -201,8 +211,8 @@ class CourseIn(CamelModel):
     eligibility: Line | None = None
     seats: Short | None = None
     fees: Short | None = None
-    syllabus_media_id: Id | None = None
-    cover_media_id: Id | None = None
+    syllabus_media_id: PdfId | None = None
+    cover_media_id: ImageId | None = None
     sort_order: int = Field(default=0, ge=0, le=100000)
     is_published: bool = True
     seo_title: SeoTitle | None = None
@@ -233,11 +243,11 @@ class CourseAdminOut(AdminOut):
 
 
 class FacultyIn(CamelModel):
-    department_id: Id
+    department_id: DepartmentId
     name: Line
     designation: Line
     qualification: Line
-    photo_media_id: Id | None = None
+    photo_media_id: ImageId | None = None
     bio: Para | None = Field(default=None, max_length=1000)
     sort_order: int = Field(default=0, ge=0, le=100000)
     is_active: bool = True
@@ -265,11 +275,16 @@ class ReorderIn(CamelModel):
 
 class PageIn(CamelModel):
     title: Line
-    slug: Slug | None = None  # (the home page keeps its empty address)
+    slug: Slug | None = Field(
+        default=None,
+        description="The web address of the page. If you change it, the old address redirects.",
+    )
     seo_title: SeoTitle | None = None
     seo_description: SeoDescription | None = None
-    og_media_id: Id | None = None
-    robots_noindex: bool = False
+    og_media_id: ImageId | None = Field(
+        default=None, description="The picture shown when the page is shared."
+    )
+    robots_noindex: bool = Field(default=False, description="Ask search engines not to list it.")
     status: PublishStatus = PublishStatus.PUBLISHED
 
 
@@ -360,6 +375,8 @@ class RevisionOut(AdminOut):
     entity_id: int
     action: str
     user_id: int | None = None
+    user_name: str | None = None
+    label: str | None = None  # the item's current title (none once it was deleted)
     created_at: datetime
 
 

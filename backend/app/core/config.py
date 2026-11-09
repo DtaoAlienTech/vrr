@@ -55,9 +55,19 @@ class Settings(BaseSettings):
     # Outgoing email. Optional: enquiries are always saved, even when email is not configured.
     smtp_host: str = ""
     smtp_port: int = 587
+    # starttls = port 587 (most providers), ssl = port 465, none = only for a local test mailbox
+    smtp_security: Literal["starttls", "ssl", "none"] = "starttls"
     smtp_user: str = ""
     smtp_password: SecretStr | None = None
     mail_from: str = ""
+
+    @model_validator(mode="after")
+    def _no_password_without_encryption(self) -> "Settings":
+        if self.smtp_security == "none" and (self.smtp_user or self.smtp_password):
+            raise ValueError(
+                "SMTP_SECURITY=none never sends a password: use starttls or ssl with a login"
+            )
+        return self
 
     @model_validator(mode="after")
     def _strong_key_in_production(self) -> "Settings":

@@ -207,6 +207,22 @@ def test_changing_the_address_of_a_published_item_leaves_a_redirect(editor, seed
     assert redirects["/news/third-address"] == "/news/first-address"
 
 
+def test_a_new_redirect_is_announced_to_the_website_but_a_plain_edit_is_not(
+    editor, seeded, refreshes
+):
+    made = editor.post(POST_NEWS, news(slug="first-address")).json()
+    refreshes.clear()
+    editor.put(f"/news/{made['id']}", news(slug="second-address"))
+    assert refreshes == [["news", "redirects"]]  # the website keeps its own list of redirects
+    refreshes.clear()
+    editor.put(f"/news/{made['id']}", news(slug="second-address", title="Another title"))
+    assert refreshes == [["news"]]
+    draft = editor.post(POST_NEWS, news(slug="draft-a", status="draft")).json()
+    refreshes.clear()
+    editor.put(f"/news/{draft['id']}", news(slug="draft-b", status="draft"))
+    assert refreshes == [["news"]]  # a draft leaves no redirect
+
+
 def test_drafts_leave_no_redirect(editor, seeded, db_session):
     made = editor.post(POST_NEWS, news(slug="draft-a", status="draft")).json()
     editor.put(f"/news/{made['id']}", news(slug="draft-b", status="draft"))
@@ -243,6 +259,10 @@ def test_every_edit_keeps_a_version_and_can_be_undone(editor, seeded, db_session
     listed = editor.get("/revisions", entity="news", entity_id=made["id"]).json()
     assert [r["action"] for r in listed] == ["update", "update", "create"]  # newest first
     assert all(r["entityId"] == made["id"] for r in listed)
+    assert all(r["userName"] == "Edith Editor" for r in listed[:2])  # who made each version
+    assert all(
+        r["label"] == "Version three" for r in listed
+    )  # which item it is (its current title)
     oldest = listed[-1]
     assert editor.get(f"/revisions/{oldest['id']}").json()["data"]["title"] == "Version one"
 

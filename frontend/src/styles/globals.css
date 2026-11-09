@@ -334,3 +334,7 @@ a.doc:hover{border-color:var(--primary)}
 /* keep the hero text clear of the cue (phones: also clear of the bottom Enquire bar) */
 .hero-cover .hero-inner{padding-bottom:168px}
 @media(min-width:820px){.hero-cover .hero-inner{padding-bottom:104px}}
+
+/* Draft preview banner (only on /preview/...) */
+.preview-bar{background:var(--accent);color:var(--navy);padding:10px 16px;font-size:.9rem;line-height:1.4;display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;text-align:center}
+.preview-bar strong{text-transform:uppercase;letter-spacing:.04em}

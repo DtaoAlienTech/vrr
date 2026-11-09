@@ -158,6 +158,8 @@ def add_redirect(db: Session, old_path: str, new_path: str, user_id: int | None)
     else:
         existing.to_path = new_path
     db.flush()
+    # finish() tells the website too: it keeps its own short-lived copy of the redirect list
+    db.info["redirects_changed"] = True
 
 
 # ---- revisions (undo) ----
@@ -231,6 +233,8 @@ def finish(
         ip=client_ip(request, settings),
     )
     db.commit()
+    if db.info.pop("redirects_changed", False) and "redirects" not in tags:
+        tags = [*tags, "redirects"]
     if tags:
         revalidate.notify(settings, tags)
 

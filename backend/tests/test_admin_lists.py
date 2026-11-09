@@ -241,6 +241,16 @@ def test_renaming_a_published_course_address_leaves_a_redirect(editor, seeded, d
     } in public
 
 
+def test_a_course_address_change_is_announced_with_its_redirect(
+    editor, seeded, db_session, refreshes
+):
+    existing = db_session.scalars(select(Course).order_by(Course.id)).first()
+    payload = course(existing.department_id, name=existing.name, tab=existing.tab, slug="renamed")
+    refreshes.clear()
+    assert editor.put(f"/courses/{existing.id}", payload).status_code == 200
+    assert refreshes and "redirects" in refreshes[-1] and "courses" in refreshes[-1]
+
+
 def test_courses_can_be_reordered_and_listed(editor, seeded):
     ids = [c["id"] for c in editor.get("/courses").json()]
     assert len(ids) == 3

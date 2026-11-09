@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
   { files: ["src/components/ui/JsonLd.tsx"], rules: { "react/no-danger": "off" } },
   // <Media> is the one image component (pre-resized variants, explicit width/height).
   { files: ["src/components/ui/Media.tsx"], rules: { "@next/next/no-img-element": "off" } },
+  // Admin screens show pictures that are already resized when uploaded (and the static logo).
+  { files: ["src/components/admin/**"], rules: { "@next/next/no-img-element": "off" } },
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
 ]);
 

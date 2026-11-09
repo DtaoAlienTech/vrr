@@ -1,5 +1,5 @@
-"""What the public API sends to the website. The shapes mirror frontend/src/lib/content/types.ts
-(camelCase). Empty optional values are left out of the JSON."""
+"""What the public API sends to the website (camelCase). Empty optional values are left out of the
+JSON. The website's TypeScript types are generated from these models (python -m app.typegen)."""
 
 from typing import Any
 
@@ -10,7 +10,12 @@ from app.schemas.blocks import DocItem, Link
 
 
 class Out(BaseModel):
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    # A value with a default (for example "") is always sent, so the generated type says "required".
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        json_schema_serialization_defaults_required=True,
+    )
 
 
 class MediaVariantOut(Out):

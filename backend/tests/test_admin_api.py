@@ -164,3 +164,51 @@ def test_audit_entries_never_hold_passwords_or_tokens(api, super_admin, make_use
         assert row.changes is None or not any(
             word in str(row.changes).lower() for word in ("password", "token", "secret", "hash")
         )
+
+
+# ---- what the admin screens are built from ----
+
+
+def test_the_edit_forms_are_described_by_json_schemas(editor):
+    response = editor.get("/forms/schema")
+    assert response.status_code == 200
+    forms = response.json()
+    assert set(forms) == {"news", "activity", "gallery", "department", "course", "faculty", "page"}
+    assert all(form["label"] and form["schema"]["type"] == "object" for form in forms.values())
+
+    news = forms["news"]["schema"]["properties"]
+    assert news["body"]["x-widget"] == "richtext"
+    cover = next(item for item in news["coverMediaId"]["anyOf"] if item.get("type") == "integer")
+    assert cover["x-widget"] == "media-image"
+    assert "description" in news["slug"] and news["category"]["$ref"].endswith("NewsCategory")
+    defs = forms["news"]["schema"]["$defs"]
+    assert defs["NewsAttachmentIn"]["properties"]["mediaId"]["x-widget"] == "media-pdf"
+    assert defs["NewsCategory"]["enum"] == ["admission", "notice", "event", "exam", "activity"]
+    assert forms["course"]["schema"]["properties"]["departmentId"]["x-widget"] == "department"
+    assert forms["course"]["schema"]["additionalProperties"] is False
+
+
+def test_the_dashboard_summarises_the_site(editor, seeded, db_session):
+    from sqlalchemy import select
+
+    from app.models import Enquiry, News
+
+    db_session.add(Enquiry(name="Asha", phone="9876543210", ip_hash="x" * 64))
+    db_session.flush()
+    first_news = db_session.scalars(select(News).order_by(News.id)).first()
+    edited = {
+        "title": "Edited by the editor",
+        "category": "notice",
+        "summary": "s",
+        "body": {"type": "doc", "content": [{"type": "paragraph"}]},
+        "status": "published",
+    }
+    assert editor.put(f"/news/{first_news.id}", edited).status_code == 200
+
+    body = editor.get("/dashboard").json()
+    assert body["counts"]["newEnquiries"] == 1 and body["counts"]["media"] == 14
+    assert body["counts"]["publishedNews"] == 5 and body["counts"]["draftNews"] == 0
+    assert body["recentEnquiries"][0]["name"] == "Asha" and "ipHash" not in str(body)
+    change = body["recentChanges"][0]
+    assert change["entity"] == "news" and change["action"] == "update"
+    assert change["label"] == "Edited by the editor" and change["userName"] == "Edith Editor"

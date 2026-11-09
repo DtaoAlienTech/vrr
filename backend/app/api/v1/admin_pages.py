@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import DbSession, Staff, SuperAdmin
 from app.core.errors import ApiError, field_errors
-from app.models import ContentRevision, Page, PageSection, Redirect, SiteSetting
+from app.models import ContentRevision, Page, PageSection, Redirect, SiteSetting, User
 from app.models.enums import MediaKind, PublishStatus, RevisionAction
 from app.schemas.admin import (
     PageAdminOut,
@@ -30,6 +30,7 @@ from app.schemas.settings import SETTINGS_GROUPS, validate_settings
 from app.services import admin_ops as ops
 from app.services.admin_ops import MediaBriefs
 from app.services.auth import Auth
+from app.services.dashboard import titles as dashboard_titles
 from app.services.revalidate import ALL_TAGS
 from app.services.revisions import RESTORERS, restorer
 
@@ -505,17 +506,28 @@ def list_revisions(
     before_id: Annotated[int | None, Query(ge=1)] = None,
 ):
     """Saved versions, newest first (the data of each version is read one at a time)."""
-    query = select(ContentRevision).order_by(ContentRevision.id.desc()).limit(limit)
+    query = (
+        select(ContentRevision, User.name)
+        .outerjoin(User, User.id == ContentRevision.user_id)
+        .order_by(ContentRevision.id.desc())
+        .limit(limit)
+    )
     if entity:
         query = query.where(ContentRevision.entity == entity)
     if entity_id:
         query = query.where(ContentRevision.entity_id == entity_id)
     if before_id:
         query = query.where(ContentRevision.id < before_id)
+    rows = list(db.execute(query))
+    wanted: dict[str, set[int]] = {}
+    for r, _ in rows:
+        wanted.setdefault(r.entity, set()).add(r.entity_id)
+    titles = {entity: dashboard_titles(db, entity, ids) for entity, ids in wanted.items()}
     return [
         {"id": r.id, "entity": r.entity, "entity_id": r.entity_id, "action": r.action,
-         "user_id": r.user_id, "created_at": r.created_at}
-        for r in db.scalars(query)
+         "user_id": r.user_id, "user_name": name, "created_at": r.created_at,
+         "label": titles.get(r.entity, {}).get(r.entity_id)}
+        for r, name in rows
     ]  # fmt: skip
 
 

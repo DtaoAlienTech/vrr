@@ -94,6 +94,14 @@ def test_changing_a_page_address_leaves_a_redirect(editor, pages, db_session):
     assert editor.api.get("/api/v1/public/pages/by-slug/about").status_code == 404
 
 
+def test_a_page_address_change_is_announced_with_its_redirect(editor, pages, refreshes):
+    editor.put(f"/pages/{pages['about']}", {"title": "About", "slug": "about-us"})
+    assert refreshes == [["pages", "redirects"]]
+    refreshes.clear()
+    editor.put(f"/pages/{pages['about']}", {"title": "About us", "slug": "about-us"})
+    assert refreshes == [["pages"]]
+
+
 def test_page_rules(editor, pages):
     home = pages["home"]
     assert (

@@ -320,6 +320,29 @@ def get_news_item(db: Session, media: MediaLookup, slug: str) -> dict[str, Any] 
     return _news(item, media)
 
 
+# ---- draft preview (the only place unpublished content is read; guarded by a signed token) ----
+
+
+def get_preview(
+    db: Session, media: MediaLookup, kind: str, entity_id: int
+) -> dict[str, Any] | None:
+    """The page or news item as the public would see it once published, whatever its status."""
+    if kind == "page":
+        page = db.scalar(
+            select(Page).where(Page.id == entity_id).options(selectinload(Page.sections))
+        )
+        return {"kind": "page", "page": page_response(db, page, media)} if page else None
+    if kind == "news":
+        item = db.scalar(
+            select(News).where(News.id == entity_id).options(selectinload(News.attachments))
+        )
+        if not item:
+            return None
+        _load_news_media([item], media)
+        return {"kind": "news", "news": _news(item, media)}
+    return None
+
+
 # ---- activities and gallery ----
 
 

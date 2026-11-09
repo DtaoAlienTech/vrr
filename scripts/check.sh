@@ -6,6 +6,9 @@ cd "$(dirname "$0")/.."
 echo "== backend: ruff (lint + format)"
 (cd backend && .venv/bin/ruff check . && .venv/bin/ruff format --check .)
 
+echo "== backend: website API types are up to date"
+(cd backend && .venv/bin/python -m app.typegen --check)
+
 echo "== backend: tests"
 (cd backend && .venv/bin/pytest -q)
 

@@ -9,6 +9,7 @@ from app.api.v1 import (
     auth,
     content,
     health,
+    preview,
     public,
 )
 
@@ -22,3 +23,4 @@ api_router.include_router(admin_media.router)
 api_router.include_router(admin_content.router)
 api_router.include_router(admin_pages.router)
 api_router.include_router(admin_people.router)
+api_router.include_router(preview.router)

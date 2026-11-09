@@ -7,6 +7,7 @@
   python -m app.cli purge-enquiries [--days 365]  delete enquiries older than this (privacy)
   python -m app.cli media-reprocess [--all]      make the resized copies of photos that lack them
   python -m app.cli media-cleanup [--dry-run]    delete files that no library entry refers to
+  python -m app.cli send-test-email [--to ...]   send a test email with the SMTP settings
 
 Passwords are asked for on the keyboard (never as an argument, which shell history would keep).
 For scripts, set the ADMIN_PASSWORD environment variable instead.
@@ -29,6 +30,7 @@ from app.models.enums import Role
 from app.seed.loader import is_empty, load_seed
 from app.services import audit, revalidate
 from app.services.auth import revoke_all_sessions
+from app.services.mailer import send_test_email
 from app.services.media import Storage, cleanup_orphans, reprocess_media
 
 _EMAIL = re.compile(r"^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$")
@@ -177,6 +179,63 @@ def media_cleanup(*, dry_run: bool, min_age_minutes: int) -> int:
     return 0
 
 
+def _mail_hint(error: Exception) -> str:
+    """Plain-language advice for the usual SMTP mistakes."""
+    import smtplib
+    import ssl
+
+    if isinstance(error, smtplib.SMTPAuthenticationError):
+        return (
+            "The mail server refused the login. Check SMTP_USER and SMTP_PASSWORD. Gmail and "
+            "Microsoft need an app password, not the normal one."
+        )
+    if isinstance(error, ssl.SSLError):
+        return (
+            "The encrypted connection failed. Port 587 needs SMTP_SECURITY=starttls, port 465 "
+            "needs SMTP_SECURITY=ssl."
+        )
+    if isinstance(error, smtplib.SMTPNotSupportedError | smtplib.SMTPServerDisconnected):
+        return "The server did not accept this kind of connection. Try the other SMTP_SECURITY."
+    if isinstance(error, smtplib.SMTPRecipientsRefused | smtplib.SMTPSenderRefused):
+        return "The server refused the sender or the recipient. Check MAIL_FROM and the address."
+    if isinstance(error, OSError):
+        return "Could not reach the mail server. Check SMTP_HOST and SMTP_PORT (and the network)."
+    return "See the message above."
+
+
+def send_test_mail(*, to: str | None) -> int:
+    """Sends one test email with the real settings and says exactly what happened."""
+    settings = get_settings()
+    to = (to or settings.enquiry_to_email).strip()
+    missing = [
+        name
+        for name, value in (
+            ("SMTP_HOST", settings.smtp_host),
+            ("MAIL_FROM", settings.mail_from),
+            ("ENQUIRY_TO_EMAIL (or --to)", to),
+        )
+        if not value
+    ]
+    if missing:
+        print("Email is not set up. Missing in .env: " + ", ".join(missing))
+        return 1
+    if not _EMAIL.match(to):
+        print(f"{to!r} is not an email address.")
+        return 1
+    print(
+        f"Sending to {to} from {settings.mail_from} via {settings.smtp_host}:{settings.smtp_port} "
+        f"({settings.smtp_security}, {'with login' if settings.smtp_user else 'no login'}) ..."
+    )
+    try:
+        send_test_email(settings, to)
+    except Exception as error:
+        print(f"FAILED: {type(error).__name__}: {error}")
+        print(_mail_hint(error))
+        return 1
+    print(f"Sent. Look in the inbox of {to} (and its spam folder).")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -214,7 +273,12 @@ def main() -> int:
         "--min-age-minutes", type=int, default=60, help="keep newer files (uploads in progress)"
     )
 
+    mail_parser = commands.add_parser("send-test-email", help="send a test email")
+    mail_parser.add_argument("--to", help="default: ENQUIRY_TO_EMAIL")
+
     args = parser.parse_args()
+    if args.command == "send-test-email":
+        return send_test_mail(to=args.to)
     if args.command == "seed":
         return seed(if_empty=args.if_empty)
     if args.command == "reset-two-factor":

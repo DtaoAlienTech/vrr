@@ -242,3 +242,19 @@ Email = Annotated[
     StringConstraints(strip_whitespace=True, to_lower=True, max_length=254, pattern=EMAIL_REGEX),
 ]
 Id = Annotated[int, Field(gt=0, strict=True)]  # a database id: a real number, never "7" or true
+# the same, but the admin form shows a photo picker / PDF picker (see x-widget in the JSON Schema)
+ImageId = Annotated[
+    int,
+    Field(gt=0, strict=True),
+    WithJsonSchema({"type": "integer", "minimum": 1, "x-widget": "media-image"}),
+]
+DepartmentId = Annotated[
+    int,
+    Field(gt=0, strict=True),
+    WithJsonSchema({"type": "integer", "minimum": 1, "x-widget": "department"}),
+]
+PdfId = Annotated[
+    int,
+    Field(gt=0, strict=True),
+    WithJsonSchema({"type": "integer", "minimum": 1, "x-widget": "media-pdf"}),
+]

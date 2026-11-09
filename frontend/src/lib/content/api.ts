@@ -11,6 +11,7 @@ import type {
   NewsItem,
   PageData,
   PageKey,
+  PreviewData,
   SiteSettings,
 } from "./types";
 
@@ -114,4 +115,19 @@ export async function getGallery(): Promise<GalleryItem[]> {
   cacheTag("gallery");
   cacheLife("hours");
   return required<GalleryItem[]>("/gallery");
+}
+
+/** A draft, opened with a signed preview token. Never cached (it is private and changes while the
+ * editor works), so it is a plain fetch, not a tagged cache function. `null` = the token is wrong,
+ * expired, or the item was deleted. */
+export async function getPreview(token: string): Promise<PreviewData | null> {
+  if (!/^[A-Za-z0-9._-]{1,200}$/.test(token)) return null;
+  const response = await fetch(`${BACKEND_URL}/api/v1/preview/${segment(token)}`, {
+    headers: { accept: "application/json" },
+    cache: "no-store",
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`Preview API answered ${response.status}`);
+  return (await response.json()) as PreviewData;
 }

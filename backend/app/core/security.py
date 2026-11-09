@@ -137,6 +137,50 @@ def csrf_matches(settings: Settings, session_id: int, given: str | None) -> bool
     return bool(given) and hmac.compare_digest(csrf_token(settings, session_id), given or "")
 
 
+# ---- preview links: a signed, short-lived address that shows one draft to whoever has it ----
+
+PREVIEW_KINDS = ("page", "news")
+PREVIEW_LIFETIME = timedelta(minutes=30)
+_PREVIEW_ID_MAX_DIGITS = 18
+
+
+def _preview_signature(settings: Settings, text: str) -> str:
+    return hmac.new(derive_key(settings, "preview"), text.encode(), hashlib.sha256).hexdigest()
+
+
+def create_preview_token(
+    settings: Settings, *, kind: str, entity_id: int, now: datetime | None = None
+) -> tuple[str, datetime]:
+    """`v1.<kind>.<id>.<expires unix time>.<signature>`. The token only ever opens one item for
+    reading, so an editor can share it with a colleague without sharing an account."""
+    if kind not in PREVIEW_KINDS or entity_id < 1:
+        raise ValueError("unknown preview target")
+    expires = (now or datetime.now(UTC)) + PREVIEW_LIFETIME
+    body = f"v1.{kind}.{entity_id}.{int(expires.timestamp())}"
+    return f"{body}.{_preview_signature(settings, body)}", expires
+
+
+def read_preview_token(
+    settings: Settings, token: str, now: datetime | None = None
+) -> tuple[str, int] | None:
+    """(kind, id) of a genuine, unexpired token; None for anything else (never an error detail)."""
+    parts = token.split(".")
+    if len(parts) != 5 or parts[0] != "v1":
+        return None
+    version, kind, raw_id, raw_expires, signature = parts
+    if kind not in PREVIEW_KINDS:
+        return None
+    for number in (raw_id, raw_expires):
+        if not (number.isascii() and number.isdigit()) or len(number) > _PREVIEW_ID_MAX_DIGITS:
+            return None
+    expected = _preview_signature(settings, f"{version}.{kind}.{raw_id}.{raw_expires}")
+    if not hmac.compare_digest(expected, signature):
+        return None
+    if int(raw_expires) < int((now or datetime.now(UTC)).timestamp()):
+        return None
+    return kind, int(raw_id)
+
+
 # ---- encryption of two-factor secrets (a leaked database must not leak them) ----
 
 

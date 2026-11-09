@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
+import { clearRedirectCache } from "@/lib/redirect-source";
 
 // Called by the backend after an admin saves content, so the public site updates within seconds.
 // Protected by a shared secret and blocked from the internet by the reverse proxy (/internal/*).
@@ -34,5 +35,7 @@ export async function POST(request: NextRequest) {
   // expire: 0 = the very next visit gets fresh content. (The default "max" would show the old page
   // once more while the new one is prepared, which looks like "my change did not save".)
   for (const tag of tags) revalidateTag(tag, { expire: 0 });
+  // The old-address list is not part of the page cache: it has its own short-lived copy.
+  if (tags.includes("redirects")) clearRedirectCache();
   return NextResponse.json({ ok: true, tags });
 }

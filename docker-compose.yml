@@ -6,6 +6,7 @@
 # frontend Next.js website. Builds its pages from the live API when it starts (first start: a few
 #          minutes; later starts reuse the saved build)
 # backend  FastAPI. Applies database migrations and adds the starter content on start, then serves /api
+# mailcatcher  (optional, `--profile mail`) test mailbox that prints enquiry emails
 # db       PostgreSQL (also usable alone for local development: docker compose up -d db)
 #
 # Settings come from the .env file next to this one (copy .env.example and replace CHANGE_ME).
@@ -51,6 +52,7 @@ services:
       TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURITY: ${SMTP_SECURITY:-starttls}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       MAIL_FROM: ${MAIL_FROM:-}
@@ -71,6 +73,27 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  # Optional test mailbox: it prints the enquiry emails instead of sending them, so you can try the
+  # email without a real mail account. Not started by `docker compose up`; see the README
+  # ("Try the enquiry email").   docker compose --profile mail up -d mailcatcher
+  mailcatcher:
+    profiles: ["mail"]
+    image: vrr-college-backend
+    build: ./backend
+    container_name: vrr-mailcatcher
+    restart: "no"
+    # The backend image starts the API by default; this replaces that with the test mailbox
+    # (and turns off the API health check the image carries).
+    entrypoint: ["python", "-m", "app.devtools.mail_sink", "1025"]
+    healthcheck:
+      disable: true
+    # Only the other containers can reach it (no published port).
+    read_only: true
     cap_drop:
       - ALL
     security_opt:
