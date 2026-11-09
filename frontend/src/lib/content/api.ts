@@ -1,8 +1,8 @@
 // The single data-access layer for the public site. Every function is cached and tagged, so the
 // admin can refresh exactly what changed through /internal/revalidate (see that route).
-// Today it reads fixtures; in Phase 1/2 only the bodies change (fetch from the FastAPI backend).
+// Content comes from the FastAPI backend (public, read-only endpoints; the response shapes are the
+// types in ./types.ts).
 import { cacheLife, cacheTag } from "next/cache";
-import { activities, courses, faculty, gallery, news, pages, settings } from "./fixtures";
 import type {
   Activity,
   Course,
@@ -14,18 +14,40 @@ import type {
   SiteSettings,
 } from "./types";
 
+const BACKEND_URL = (process.env.BACKEND_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+
+/** `null` when the content does not exist (404). Any other failure throws, so a hiccup of the API
+ * is never cached as "not found" (errors are not cached; the next visit tries again). */
+async function fetchContent<T>(path: string): Promise<T | null> {
+  const response = await fetch(`${BACKEND_URL}/api/v1/public${path}`, {
+    headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`Content API ${path} answered ${response.status}`);
+  return (await response.json()) as T;
+}
+
+async function required<T>(path: string): Promise<T> {
+  const data = await fetchContent<T>(path);
+  if (data === null) throw new Error(`Content API ${path} has no content`);
+  return data;
+}
+
+const segment = encodeURIComponent;
+
 export async function getSiteSettings(): Promise<SiteSettings> {
   "use cache";
   cacheTag("settings");
   cacheLife("hours");
-  return settings;
+  return required<SiteSettings>("/settings");
 }
 
 export async function getPage(key: PageKey): Promise<PageData | null> {
   "use cache";
   cacheTag("pages", `page:${key}`);
   cacheLife("hours");
-  return pages[key] ?? null;
+  return fetchContent<PageData>(`/pages/${segment(key)}`);
 }
 
 /** Finds a page by its URL path (without the leading slash). The home page is not included. */
@@ -33,67 +55,63 @@ export async function getPageBySlug(slug: string): Promise<PageData | null> {
   "use cache";
   cacheTag("pages", `page-slug:${slug}`);
   cacheLife("hours");
-  return Object.values(pages).find((page) => page.slug !== "" && page.slug === slug) ?? null;
+  return slug === "" ? null : fetchContent<PageData>(`/pages/by-slug/${segment(slug)}`);
 }
 
 export async function getPageSlugs(): Promise<string[]> {
   "use cache";
   cacheTag("pages");
   cacheLife("hours");
-  return Object.values(pages)
-    .map((page) => page.slug)
-    .filter((slug) => slug !== "");
+  const pages = await required<{ slug: string }[]>("/pages");
+  return pages.map((page) => page.slug).filter((slug) => slug !== "");
 }
 
 export async function getCourses(limit?: number): Promise<Course[]> {
   "use cache";
   cacheTag("courses");
   cacheLife("hours");
-  return courses.slice(0, limit);
+  return (await required<Course[]>("/courses")).slice(0, limit);
 }
 
 export async function getCourse(slug: string): Promise<Course | null> {
   "use cache";
   cacheTag("courses", `course:${slug}`);
   cacheLife("hours");
-  return courses.find((course) => course.slug === slug) ?? null;
+  return fetchContent<Course>(`/courses/${segment(slug)}`);
 }
 
 export async function getActivities(limit?: number): Promise<Activity[]> {
   "use cache";
   cacheTag("activities");
   cacheLife("hours");
-  return activities.slice(0, limit);
+  return (await required<Activity[]>("/activities")).slice(0, limit);
 }
 
-/** Pinned items first, then newest first. */
+/** The API sends pinned items first, then newest first. */
 export async function getNews(limit?: number): Promise<NewsItem[]> {
   "use cache";
   cacheTag("news");
   cacheLife("hours");
-  const sorted = [...news].sort(
-    (a, b) => Number(b.pinned ?? false) - Number(a.pinned ?? false) || b.publishedAt.localeCompare(a.publishedAt),
-  );
-  return sorted.slice(0, limit);
+  return (await required<NewsItem[]>("/news")).slice(0, limit);
 }
 
 export async function getNewsItem(slug: string): Promise<NewsItem | null> {
   "use cache";
   cacheTag("news", `news:${slug}`);
   cacheLife("hours");
-  return news.find((item) => item.slug === slug) ?? null;
+  return fetchContent<NewsItem>(`/news/${segment(slug)}`);
 }
 
 export async function getFaculty(): Promise<FacultyMember[]> {
   "use cache";
   cacheTag("faculty");
   cacheLife("hours");
-  return faculty;
+  return required<FacultyMember[]>("/faculty");
 }
 
 export async function getGallery(): Promise<GalleryItem[]> {
   "use cache";
   cacheTag("gallery");
   cacheLife("hours");
-  return gallery;
+  return required<GalleryItem[]>("/gallery");
 }

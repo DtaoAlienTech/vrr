@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     # than the real number of proxies, or visitors could fake their address.
     trusted_proxy_hops: int = Field(default=0, ge=0, le=5)
 
+    # Where uploaded photos and PDFs are stored. In Docker this is a shared volume that Caddy also
+    # serves at /uploads. The website builds picture addresses from `uploads_url`.
+    upload_dir: Path = ROOT / "uploads"
+    uploads_url: str = "/uploads"
+
     # Enquiry form
     enquiry_to_email: str = ""
     enquiry_rate_limit_per_hour: int = Field(default=5, ge=1)

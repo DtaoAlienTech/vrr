@@ -65,3 +65,26 @@ class RevisionAction(StrEnum):
     UPDATE = "update"
     DELETE = "delete"
     RESTORE = "restore"
+
+
+# Words shown on the website for each value above.
+GROUP_LABELS = {
+    ActivityGroup.LEO: "Leo Club",
+    ActivityGroup.NSS: "NSS",
+    ActivityGroup.CULTURAL: "Cultural",
+    ActivityGroup.SPORTS: "Sports",
+    ActivityGroup.OTHER: "Other",
+}
+CATEGORY_LABELS = {
+    NewsCategory.ADMISSION: "Admission",
+    NewsCategory.NOTICE: "Notice",
+    NewsCategory.EVENT: "Event",
+    NewsCategory.EXAM: "Exam",
+    NewsCategory.ACTIVITY: "Activity",
+}
+GALLERY_LABELS = {
+    GalleryCategory.CAMPUS: "Campus",
+    GalleryCategory.LEO: "Leo Club",
+    GalleryCategory.NSS: "NSS",
+    GalleryCategory.OTHER: "Other",
+}

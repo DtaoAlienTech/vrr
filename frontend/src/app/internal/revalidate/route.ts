@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "no valid tags" }, { status: 400 });
   }
 
-  for (const tag of tags) revalidateTag(tag, "max");
+  // expire: 0 = the very next visit gets fresh content. (The default "max" would show the old page
+  // once more while the new one is prepared, which looks like "my change did not save".)
+  for (const tag of tags) revalidateTag(tag, { expire: 0 });
   return NextResponse.json({ ok: true, tags });
 }

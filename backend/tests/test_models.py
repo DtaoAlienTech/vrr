@@ -25,6 +25,11 @@ from app.models import (
 NOW = datetime(2026, 11, 9, tzinfo=UTC)
 
 
+@pytest.fixture(autouse=True)
+def _start_from_an_empty_site(empty_content):
+    """The development database holds the starter content; these tests need a blank site."""
+
+
 def rejected(db: Session, *objects):
     """Assert that the database refuses these rows (and undo only that attempt)."""
     with pytest.raises(IntegrityError), db.begin_nested():

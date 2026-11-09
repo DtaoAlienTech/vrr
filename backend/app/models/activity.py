@@ -1,6 +1,13 @@
-from datetime import date
-
-from sqlalchemy import BigInteger, Boolean, Date, ForeignKey, Index, String, text
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    CheckConstraint,
+    ForeignKey,
+    Index,
+    SmallInteger,
+    String,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, IdMixin, TimestampMixin, check_in, slug_check
@@ -16,13 +23,15 @@ class Activity(IdMixin, TimestampMixin, Base):
         check_in('"group"', ActivityGroup, name="group_valid"),
         check_in("status", PublishStatus),
         slug_check(),
+        CheckConstraint("year IS NULL OR year BETWEEN 1990 AND 2100", name="year_range"),
         Index("ix_activities_status_show_on_home", "status", "show_on_home"),
     )
 
     title: Mapped[str] = mapped_column(String(200))
     slug: Mapped[str] = mapped_column(String(120), unique=True)
     group: Mapped[str] = mapped_column(String(20))
-    activity_date: Mapped[date | None] = mapped_column(Date)
+    # The year is what the website shows; the college rarely has an exact date.
+    year: Mapped[int | None] = mapped_column(SmallInteger)
     summary: Mapped[str] = mapped_column(String(500))
     cover_media_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("media.id", ondelete="RESTRICT")

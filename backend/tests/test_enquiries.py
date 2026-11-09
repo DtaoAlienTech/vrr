@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -17,6 +17,14 @@ VALID: dict[str, Any] = {
     "message": "Please call me about admission.",
     "source_page": "/",
 }
+
+
+@pytest.fixture(autouse=True)
+def _no_earlier_enquiries(db_session: Session) -> None:
+    """Each test starts with no enquiries (removed inside the test's own, rolled-back transaction),
+    so existing rows in the development database cannot change the results."""
+    db_session.execute(delete(Enquiry))
+    db_session.flush()
 
 
 def count(db: Session) -> int:

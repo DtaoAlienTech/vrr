@@ -15,6 +15,16 @@
 		reverse_proxy backend:8000
 	}
 
+	# Uploaded photos and PDFs: served straight from the shared volume, cached for a year (file
+	# names never repeat), and never allowed to run anything.
+	handle /uploads/* {
+		root * /srv
+		file_server
+		header Cache-Control "public, max-age=31536000, immutable"
+		header X-Content-Type-Options nosniff
+		header Content-Security-Policy "default-src 'none'"
+	}
+
 	handle {
 		reverse_proxy frontend:3000
 	}

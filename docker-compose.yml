@@ -3,8 +3,9 @@
 #   docker compose up -d --build        then open http://localhost:3000
 #
 # caddy    The single entry point: /api goes to the backend, everything else to the website
-# frontend Next.js website
-# backend  FastAPI. Applies database migrations on start, then serves /api
+# frontend Next.js website. Builds its pages from the live API when it starts (first start: a few
+#          minutes; later starts reuse the saved build)
+# backend  FastAPI. Applies database migrations and adds the starter content on start, then serves /api
 # db       PostgreSQL (also usable alone for local development: docker compose up -d db)
 #
 # Settings come from the .env file next to this one (copy .env.example and replace CHANGE_ME).
@@ -55,8 +56,14 @@ services:
       MAIL_FROM: ${MAIL_FROM:-}
       REVALIDATE_URL: http://frontend:3000/internal/revalidate
       REVALIDATE_SECRET: ${REVALIDATE_SECRET:?Set REVALIDATE_SECRET in .env}
+      # Photos and PDFs are saved here (a volume Caddy also reads).
+      UPLOAD_DIR: /data/uploads
+      # 1 = add the starter content when the database is empty (never touches existing content)
+      SEED_ON_START: ${SEED_ON_START:-1}
+    volumes:
+      - uploads:/data/uploads
     # No published port: the only way in is through Caddy.
-    # Hardening: read-only filesystem, no extra privileges.
+    # Hardening: read-only filesystem (only the uploads volume is writable), no extra privileges.
     read_only: true
     tmpfs:
       - /tmp
@@ -66,19 +73,21 @@ services:
       - no-new-privileges:true
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        SITE_URL: ${SITE_URL:-http://localhost:3000}
-        BACKEND_URL: http://backend:8000
-        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+    build: ./frontend
     container_name: vrr-frontend
     restart: unless-stopped
     depends_on:
       backend:
         condition: service_healthy
     environment:
+      # Read when the site is built at start-up (and by the running server).
+      SITE_URL: ${SITE_URL:-http://localhost:3000}
+      BACKEND_URL: http://backend:8000
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
       REVALIDATE_SECRET: ${REVALIDATE_SECRET:?Set REVALIDATE_SECRET in .env}
+    volumes:
+      # The saved build, so a restart does not build again (it rebuilds when the code changes).
+      - next_build:/app/.next
     # No published port: the only way in is through Caddy.
     cap_drop:
       - ALL
@@ -96,6 +105,7 @@ services:
       - "127.0.0.1:3000:8080"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - uploads:/srv/uploads:ro
       - caddy_data:/data
       - caddy_config:/config
     healthcheck:
@@ -111,5 +121,7 @@ services:
 
 volumes:
   pgdata:
+  uploads:
+  next_build:
   caddy_data:
   caddy_config:

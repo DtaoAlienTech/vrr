@@ -1,40 +1,29 @@
-# Website image: three stages (install, build, run). Only the small standalone server is shipped.
+# Website image.
+#
+# The pages are built from the live API (content comes from the database), so the build cannot run
+# while the image is built: the backend is not running yet. Instead the container builds the site
+# when it starts, after the backend is healthy (docker-entrypoint.sh). The result is kept in a
+# volume, so a normal restart is fast; it is rebuilt only when this code changes.
+FROM node:24-slim
 
-FROM node:24-slim AS deps
+ENV NEXT_TELEMETRY_DISABLED=1
+# /app belongs to the unprivileged "node" user, so nothing here runs as root.
+RUN mkdir /app && chown node:node /app
+USER node
 WORKDIR /app
-COPY package.json package-lock.json ./
+
+COPY --chown=node:node package.json package-lock.json ./
 RUN npm ci
 
-FROM node:24-slim AS build
-WORKDIR /app
-# These are fixed into the build (CSP, /api proxy address, public keys), so they are build arguments.
-ARG SITE_URL=http://localhost:3000
-ARG BACKEND_URL=http://backend:8000
-ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY=
-ENV NEXT_TELEMETRY_DISABLED=1 \
-    BUILD_STANDALONE=1 \
-    SITE_URL=$SITE_URL \
-    BACKEND_URL=$BACKEND_URL \
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npm run build
-
-FROM node:24-slim AS run
-WORKDIR /app
-ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
-    HOSTNAME=0.0.0.0
-COPY --from=build --chown=node:node /app/.next/standalone ./
-COPY --from=build --chown=node:node /app/.next/static ./.next/static
-COPY --from=build --chown=node:node /app/public ./public
-
-# The "node" user is built into the image; never run as root.
-USER node
+COPY --chown=node:node . .
+# Fingerprint of the code. The saved build is reused only while it matches.
+RUN find . -path ./node_modules -prune -o -type f ! -name SOURCE_HASH -print0 \
+      | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1 > SOURCE_HASH \
+    && mkdir -p .next && chmod 0555 docker-entrypoint.sh
 
 EXPOSE 3000
-HEALTHCHECK --interval=10s --timeout=4s --start-period=20s --retries=6 \
+# The first start builds the site, which takes a few minutes: no failures are counted until then.
+HEALTHCHECK --interval=15s --timeout=4s --start-period=600s --retries=6 \
     CMD ["node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
 
-CMD ["node", "server.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]

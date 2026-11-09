@@ -17,13 +17,13 @@ cp .env.example .env            # then replace every CHANGE_ME (see "Secrets" be
 docker compose up -d --build    # builds both apps, starts everything
 ```
 
-Open **http://localhost:3000**. The first build takes a few minutes; after that it takes seconds.
+Open **http://localhost:3000**. The first start takes a few minutes: the images are built, the backend adds the starter content (college details, courses, photos, sample pages) to the empty database, and then the website builds its pages from the live API. Later starts take seconds, because the website build is saved and reused until the code changes.
 
 | Container | What it does |
 |---|---|
 | `vrr-caddy` | The only door in: `/api/*` goes to the backend, everything else to the website, `/internal/*` is blocked |
-| `vrr-frontend` | The Next.js website |
-| `vrr-backend` | The FastAPI API. Applies database migrations by itself on every start |
+| `vrr-frontend` | The Next.js website. Builds its pages from the API when it starts (the build is saved in a volume) |
+| `vrr-backend` | The FastAPI API. Applies database migrations and, on an empty database, adds the starter content |
 | `vrr-db` | PostgreSQL (data is kept in a Docker volume) |
 
 Useful commands:
@@ -37,6 +37,8 @@ docker compose down -v                # ... and DELETE the database data too
 ```
 
 Only Caddy (port 3000) and the database (localhost:5433) are reachable from the host. The backend and the website have no published ports.
+
+Photos and PDFs live in the `uploads` volume: the backend writes them and Caddy serves them at `/uploads/...`. The starter content is added only when the database has no pages (`SEED_ON_START=0` in `.env` turns that off; `docker compose exec backend python -m app.cli seed --if-empty` runs it by hand). The texts marked "Sample" in it are placeholders and must be replaced before launch.
 
 ### Secrets
 
@@ -62,6 +64,9 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 alembic upgrade head
 uvicorn app.main:app --reload   # http://127.0.0.1:8000/api/v1/health
+
+# photos: the starter content saved its photos in the Docker volume; copy them for local use
+mkdir -p ../uploads && docker cp vrr-backend:/data/uploads/. ../uploads/
 
 # frontend (terminal 2)
 cd frontend

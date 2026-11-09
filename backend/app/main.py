@@ -2,6 +2,7 @@ from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
@@ -38,6 +39,12 @@ def create_app() -> FastAPI:
         return response
 
     app.include_router(api_router, prefix=settings.api_prefix)
+    # Development convenience. In Docker, Caddy answers /uploads itself from the shared volume.
+    app.mount(
+        settings.uploads_url,
+        StaticFiles(directory=settings.upload_dir, check_dir=False),
+        name="uploads",
+    )
     return app
 
 

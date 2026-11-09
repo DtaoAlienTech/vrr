@@ -17,6 +17,10 @@ COPY migrations ./migrations
 COPY alembic.ini docker-entrypoint.sh ./
 RUN chmod 0555 docker-entrypoint.sh
 
+# Uploaded photos live in a volume (shared with Caddy, which serves them). Creating the folder
+# here, owned by the unprivileged user, lets the new volume inherit that ownership.
+RUN mkdir -p /data/uploads && chown 10001:10001 /data/uploads
+
 # Never run as root inside the container.
 USER 10001:10001
 

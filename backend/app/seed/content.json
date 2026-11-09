@@ -1,0 +1,1340 @@
+{
+ "settings": {
+  "brand": {
+   "name": "VRR Degree College",
+   "shortName": "VRR",
+   "tagline": "Kallur · Est. 2016",
+   "established": 2016,
+   "topBar": "Affiliated to Sri Venkateswara University · UGC",
+   "affiliationText": "Affiliated to Sri Venkateswara University.",
+   "copyright": "© 2026 VRR Degree College. All rights reserved.",
+   "logo": {
+    "mediaKey": "logo"
+   }
+  },
+  "contact": {
+   "address": "Piler Road, Kallur"
+  },
+  "social": {
+   "items": []
+  },
+  "menu": {
+   "items": [
+    {
+     "label": "Home",
+     "href": "/"
+    },
+    {
+     "label": "About",
+     "href": "/about"
+    },
+    {
+     "label": "Courses",
+     "href": "/courses"
+    },
+    {
+     "label": "Faculty",
+     "href": "/faculty"
+    },
+    {
+     "label": "Admissions",
+     "href": "/admissions"
+    },
+    {
+     "label": "Activities",
+     "href": "/activities"
+    },
+    {
+     "label": "Gallery",
+     "href": "/gallery"
+    },
+    {
+     "label": "News",
+     "href": "/news"
+    },
+    {
+     "label": "Contact",
+     "href": "/contact"
+    }
+   ]
+  },
+  "footer_courses": {
+   "items": [
+    {
+     "label": "B.Sc Computer Science",
+     "href": "/courses/bsc-computer-science"
+    },
+    {
+     "label": "B.Sc Zoology",
+     "href": "/courses/bsc-zoology"
+    },
+    {
+     "label": "B.Com Computer Science",
+     "href": "/courses/bcom-computer-science"
+    }
+   ]
+  },
+  "seo": {
+   "defaultTitle": "VRR Degree College, Kallur",
+   "titleTemplate": "%s | VRR Degree College",
+   "description": "VRR Degree College, Piler Road, Kallur. B.Sc Computer Science, B.Sc Zoology and B.Com programs affiliated to Sri Venkateswara University.",
+   "ogImage": {
+    "mediaKey": "campus-1"
+   }
+  }
+ },
+ "departments": [
+  {
+   "slug": "computer-science",
+   "name": "Computer Science"
+  },
+  {
+   "slug": "zoology",
+   "name": "Zoology"
+  },
+  {
+   "slug": "commerce",
+   "name": "Commerce"
+  }
+ ],
+ "courses": [
+  {
+   "slug": "bsc-computer-science",
+   "tab": "Computer Science",
+   "name": "B.Sc Computer Science",
+   "department": "computer-science",
+   "durationYears": 3,
+   "affiliation": "Sri Venkateswara University",
+   "summary": "Programming, databases and the foundations of modern computing, taught with hands-on lab work.",
+   "description": {
+    "type": "doc",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "Sample text: This program introduces students to programming, databases, networks and the foundations of computing."
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "The course description is written by the college and can be edited from the admin panel."
+       }
+      ]
+     }
+    ]
+   },
+   "subjects": [
+    "Programming fundamentals",
+    "Data structures and databases",
+    "Web technologies",
+    "Mathematics for computing"
+   ]
+  },
+  {
+   "slug": "bsc-zoology",
+   "tab": "Zoology",
+   "name": "B.Sc Zoology",
+   "department": "zoology",
+   "durationYears": 3,
+   "affiliation": "Sri Venkateswara University",
+   "summary": "The study of animal life and ecology, with practical laboratory and field learning.",
+   "subjects": []
+  },
+  {
+   "slug": "bcom-computer-science",
+   "tab": "Commerce",
+   "name": "B.Com Computer Science",
+   "department": "commerce",
+   "durationYears": 3,
+   "affiliation": "Sri Venkateswara University",
+   "summary": "Accounting and commerce fundamentals combined with practical computer skills.",
+   "subjects": []
+  }
+ ],
+ "faculty": [
+  {
+   "name": "Sample Faculty 1",
+   "designation": "Designation (sample)",
+   "qualification": "Qualification (sample)",
+   "department": "computer-science"
+  },
+  {
+   "name": "Sample Faculty 2",
+   "designation": "Designation (sample)",
+   "qualification": "Qualification (sample)",
+   "department": "computer-science"
+  },
+  {
+   "name": "Sample Faculty 3",
+   "designation": "Designation (sample)",
+   "qualification": "Qualification (sample)",
+   "department": "zoology"
+  },
+  {
+   "name": "Sample Faculty 4",
+   "designation": "Designation (sample)",
+   "qualification": "Qualification (sample)",
+   "department": "zoology"
+  },
+  {
+   "name": "Sample Faculty 5",
+   "designation": "Designation (sample)",
+   "qualification": "Qualification (sample)",
+   "department": "commerce"
+  },
+  {
+   "name": "Sample Faculty 6",
+   "designation": "Designation (sample)",
+   "qualification": "Qualification (sample)",
+   "department": "commerce"
+  },
+  {
+   "name": "Sample Faculty 7",
+   "designation": "Designation (sample)",
+   "qualification": "Qualification (sample)",
+   "department": "computer-science"
+  },
+  {
+   "name": "Sample Faculty 8",
+   "designation": "Designation (sample)",
+   "qualification": "Qualification (sample)",
+   "department": "commerce"
+  }
+ ],
+ "activities": [
+  {
+   "slug": "nss-campus-clean-up",
+   "group": "nss",
+   "year": 2022,
+   "title": "NSS volunteers: campus clean-up",
+   "summary": "Volunteers of the college National Service Scheme unit during a clean-up activity.",
+   "cover": "nss-1",
+   "showOnHome": true,
+   "photos": [
+    {
+     "media": "nss-1"
+    },
+    {
+     "media": "nss-3"
+    },
+    {
+     "media": "nss-4"
+    },
+    {
+     "media": "nss-5"
+    },
+    {
+     "media": "nss-2"
+    },
+    {
+     "media": "nss-6"
+    },
+    {
+     "media": "nss-7"
+    }
+   ]
+  },
+  {
+   "slug": "leo-club",
+   "group": "leo",
+   "title": "Leo Club of V.R.R. College, Kallur",
+   "summary": "Members of the Leo Club (Lions District 317E) with the club banner, taking part in a community activity.",
+   "cover": "leo-1",
+   "showOnHome": true,
+   "photos": [
+    {
+     "media": "leo-1"
+    }
+   ]
+  }
+ ],
+ "news": [
+  {
+   "slug": "sample-admissions-open",
+   "title": "Sample: Admissions open for the new academic year",
+   "category": "admission",
+   "publishedAt": "2026-10-28",
+   "summary": "Sample text. The college writes the notice and attaches any PDF from the admin panel.",
+   "body": {
+    "type": "doc",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "Sample text. The college writes the notice here and can attach a PDF."
+       }
+      ]
+     }
+    ]
+   },
+   "pinned": true
+  },
+  {
+   "slug": "sample-semester-timetable",
+   "title": "Sample: Semester timetable released",
+   "category": "notice",
+   "publishedAt": "2026-10-20",
+   "summary": "Sample text for a regular notice with a short summary.",
+   "body": {
+    "type": "doc",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "Sample text for a regular notice."
+       }
+      ]
+     }
+    ]
+   },
+   "pinned": false
+  },
+  {
+   "slug": "sample-annual-day",
+   "title": "Sample: Annual day celebrations",
+   "category": "event",
+   "publishedAt": "2026-10-12",
+   "summary": "Sample text for an event announcement with photos in the gallery.",
+   "body": {
+    "type": "doc",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "Sample text for an event announcement."
+       }
+      ]
+     }
+    ]
+   },
+   "pinned": false
+  },
+  {
+   "slug": "sample-scholarship-information",
+   "title": "Sample: Scholarship information",
+   "category": "notice",
+   "publishedAt": "2026-10-05",
+   "summary": "Sample text for scholarship and fee related information.",
+   "body": {
+    "type": "doc",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "Sample text for scholarship information."
+       }
+      ]
+     }
+    ]
+   },
+   "pinned": false
+  },
+  {
+   "slug": "sample-leo-club-update",
+   "title": "Sample: Leo Club activity update",
+   "category": "activity",
+   "publishedAt": "2026-10-02",
+   "summary": "Sample text. Photos of club activities are added to the gallery and shown on the home page.",
+   "body": {
+    "type": "doc",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "Sample text for a club activity update."
+       }
+      ]
+     }
+    ]
+   },
+   "pinned": false
+  }
+ ],
+ "gallery": [
+  {
+   "media": "campus-2",
+   "caption": "Campus building",
+   "category": "campus"
+  },
+  {
+   "media": "campus-4",
+   "caption": "Corner view",
+   "category": "campus"
+  },
+  {
+   "media": "campus-5",
+   "caption": "Side view",
+   "category": "campus"
+  },
+  {
+   "media": "campus-3",
+   "caption": "Front view",
+   "category": "campus"
+  },
+  {
+   "media": "campus-1",
+   "caption": "College bus",
+   "category": "campus"
+  },
+  {
+   "media": "leo-1",
+   "caption": "Leo Club volunteers",
+   "category": "leo"
+  },
+  {
+   "media": "nss-1",
+   "caption": "NSS volunteers",
+   "category": "nss"
+  },
+  {
+   "media": "nss-3",
+   "caption": "NSS clean-up",
+   "category": "nss"
+  },
+  {
+   "media": "nss-4",
+   "caption": "NSS clean-up",
+   "category": "nss"
+  },
+  {
+   "media": "nss-5",
+   "caption": "NSS team",
+   "category": "nss"
+  },
+  {
+   "media": "nss-2",
+   "caption": "NSS volunteers",
+   "category": "nss"
+  },
+  {
+   "media": "nss-6",
+   "caption": "NSS clean-up",
+   "category": "nss"
+  },
+  {
+   "media": "nss-7",
+   "caption": "NSS volunteers",
+   "category": "nss"
+  }
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "slug": "",
+   "title": "Home",
+   "seoTitle": "VRR Degree College, Kallur | B.Sc and B.Com Degree College",
+   "seoDescription": "VRR Degree College, Piler Road, Kallur. B.Sc Computer Science, B.Sc Zoology and B.Com programs affiliated to Sri Venkateswara University.",
+   "ogMedia": "campus-1",
+   "noindex": false,
+   "sections": [
+    {
+     "type": "hero",
+     "data": {
+      "label": "Kallur · Piler Road · Est. 2016",
+      "headline": "Shape your future at",
+      "highlight": "VRR Degree College",
+      "text": "Three-year undergraduate programs in Computer Science, Zoology and Commerce, affiliated to Sri Venkateswara University.",
+      "primaryCta": {
+       "label": "Enquire now",
+       "href": "/admissions#enquire"
+      },
+      "secondaryCta": {
+       "label": "View courses",
+       "href": "/courses"
+      },
+      "image": {
+       "mediaKey": "campus-1"
+      }
+     }
+    },
+    {
+     "type": "stats",
+     "data": {
+      "items": [
+       {
+        "value": "2016",
+        "label": "Established"
+       },
+       {
+        "value": "3",
+        "label": "Programs"
+       },
+       {
+        "value": "3",
+        "label": "Departments"
+       },
+       {
+        "value": "SVU",
+        "label": "Affiliated"
+       }
+      ]
+     }
+    },
+    {
+     "type": "notice_strip",
+     "data": {
+      "label": "Notices",
+      "items": [
+       "Sample notice: Admissions open for the new academic year",
+       "Sample notice: Semester timetable released",
+       "Sample notice: Scholarship information"
+      ]
+     }
+    },
+    {
+     "type": "collection_list",
+     "data": {
+      "collection": "courses",
+      "layout": "cards",
+      "heading": "Programs built for your next step",
+      "intro": "Choose from three undergraduate programs, each three years long."
+     }
+    },
+    {
+     "type": "collection_list",
+     "data": {
+      "collection": "activities",
+      "layout": "cards",
+      "tone": "alt",
+      "heading": "Student activities: Leo Club & NSS",
+      "intro": "Service and leadership activities by our students. Photos and updates are added by the college from the admin panel.",
+      "cta": {
+       "label": "View all activities",
+       "href": "/activities"
+      }
+     }
+    },
+    {
+     "type": "quote",
+     "data": {
+      "heading": "A word of welcome",
+      "text": "A short welcome message from the Principal will appear here. It can be changed any time from the admin panel, without a developer.",
+      "name": "Principal’s Name",
+      "role": "Principal, VRR Degree College"
+     }
+    },
+    {
+     "type": "card_grid",
+     "data": {
+      "variant": "numbered",
+      "tone": "alt",
+      "heading": "What students can expect",
+      "cards": [
+       {
+        "title": "University affiliated",
+        "text": "Degrees under Sri Venkateswara University."
+       },
+       {
+        "title": "Three focused departments",
+        "text": "Computer Science, Zoology and Commerce."
+       },
+       {
+        "title": "Practical learning",
+        "text": "Lab work alongside classroom teaching. (Sample text)"
+       },
+       {
+        "title": "Supportive campus",
+        "text": "Guidance and care for every student. (Sample text)"
+       }
+      ]
+     }
+    },
+    {
+     "type": "media_gallery",
+     "data": {
+      "heading": "A look around the college",
+      "intro": "Photos and videos are added by the college from the admin panel.",
+      "cta": {
+       "label": "Open gallery",
+       "href": "/gallery"
+      },
+      "items": [
+       {
+        "media": {
+         "mediaKey": "campus-2"
+        },
+        "caption": "Campus building"
+       },
+       {
+        "media": {
+         "mediaKey": "campus-4"
+        },
+        "caption": "Corner view"
+       },
+       {
+        "media": {
+         "mediaKey": "campus-5"
+        },
+        "caption": "Side view"
+       },
+       {
+        "media": {
+         "mediaKey": "campus-3"
+        },
+        "caption": "Front view"
+       },
+       {
+        "media": {
+         "mediaKey": "campus-1"
+        },
+        "caption": "College bus"
+       }
+      ]
+     }
+    },
+    {
+     "type": "enquiry_cta",
+     "data": {
+      "heading": "Ready to join? Send us your details.",
+      "text": "Our team will call you back with course details and the admission process."
+     }
+    }
+   ]
+  },
+  {
+   "key": "about",
+   "slug": "about",
+   "title": "About",
+   "seoTitle": "About VRR Degree College, Kallur",
+   "seoDescription": "History, vision, mission and approvals of VRR Degree College, Kallur.",
+   "noindex": false,
+   "sections": [
+    {
+     "type": "page_header",
+     "data": {
+      "title": "About the college",
+      "subtitle": "Founded in 2016 on Piler Road, Kallur, and affiliated to Sri Venkateswara University."
+     }
+    },
+    {
+     "type": "two_column",
+     "data": {
+      "heading": "A college rooted in Kallur",
+      "main": [
+       {
+        "type": "timeline",
+        "data": {
+         "items": [
+          {
+           "label": "2016",
+           "text": "VRR Degree College was established at Piler Road, Kallur."
+          },
+          {
+           "label": "Today",
+           "text": "Three departments and three undergraduate programs. (More milestones will be added by the college.)"
+          }
+         ]
+        }
+       },
+       {
+        "type": "rich_text",
+        "data": {
+         "body": {
+          "type": "doc",
+          "content": [
+           {
+            "type": "paragraph",
+            "content": [
+             {
+              "type": "text",
+              "text": "The college history will be written here in the college’s own words. The text can be edited from the admin panel at any time."
+             }
+            ]
+           }
+          ]
+         }
+        }
+       }
+      ],
+      "aside": [
+       {
+        "type": "image",
+        "data": {
+         "media": {
+          "mediaKey": "campus-3"
+         }
+        }
+       },
+       {
+        "type": "panel",
+        "data": {
+         "items": [
+          {
+           "heading": "Vision",
+           "text": "Sample: To be a trusted centre of learning for the region."
+          },
+          {
+           "heading": "Mission",
+           "text": "Sample: To give every student a strong foundation in knowledge and character."
+          }
+         ]
+        }
+       }
+      ]
+     }
+    },
+    {
+     "type": "doc_list",
+     "data": {
+      "tone": "alt",
+      "heading": "Recognised and affiliated",
+      "docs": [
+       {
+        "title": "Sri Venkateswara University",
+        "note": "Affiliation"
+       },
+       {
+        "title": "UGC",
+        "note": "Approval"
+       }
+      ]
+     }
+    },
+    {
+     "type": "card_grid",
+     "data": {
+      "variant": "tiles",
+      "heading": "Spaces for learning",
+      "intro": "Sample list. The college will confirm which facilities to show.",
+      "cards": [
+       {
+        "title": "Classrooms"
+       },
+       {
+        "title": "Computer lab"
+       },
+       {
+        "title": "Zoology lab"
+       },
+       {
+        "title": "Library"
+       }
+      ]
+     }
+    },
+    {
+     "type": "quote",
+     "data": {
+      "heading": "Leadership",
+      "text": "Message from the Chairman or Principal. (Sample placeholder)",
+      "name": "Name",
+      "role": "Designation"
+     }
+    }
+   ]
+  },
+  {
+   "key": "courses",
+   "slug": "courses",
+   "title": "Courses",
+   "seoTitle": "Courses",
+   "seoDescription": "B.Sc Computer Science, B.Sc Zoology and B.Com Computer Science at VRR Degree College, Kallur.",
+   "noindex": false,
+   "sections": [
+    {
+     "type": "page_header",
+     "data": {
+      "title": "Our courses",
+      "subtitle": "Three-year undergraduate programs, affiliated to Sri Venkateswara University."
+     }
+    },
+    {
+     "type": "collection_list",
+     "data": {
+      "collection": "courses",
+      "layout": "detailed"
+     }
+    }
+   ]
+  },
+  {
+   "key": "faculty",
+   "slug": "faculty",
+   "title": "Faculty",
+   "seoTitle": "Faculty",
+   "seoDescription": "Meet the faculty of VRR Degree College, Kallur.",
+   "noindex": false,
+   "sections": [
+    {
+     "type": "page_header",
+     "data": {
+      "title": "Our faculty",
+      "subtitle": "Teachers and mentors across our three departments."
+     }
+    },
+    {
+     "type": "collection_list",
+     "data": {
+      "collection": "faculty",
+      "layout": "grid"
+     }
+    }
+   ]
+  },
+  {
+   "key": "admissions",
+   "slug": "admissions",
+   "title": "Admissions",
+   "seoTitle": "Admissions",
+   "seoDescription": "Admission process, eligibility and enquiry form for VRR Degree College, Kallur.",
+   "noindex": false,
+   "sections": [
+    {
+     "type": "page_header",
+     "data": {
+      "title": "Admissions",
+      "subtitle": "How to join VRR Degree College."
+     }
+    },
+    {
+     "type": "card_grid",
+     "data": {
+      "variant": "steps",
+      "heading": "Four simple steps",
+      "intro": "Sample steps. The college will confirm the real admission process.",
+      "cards": [
+       {
+        "title": "Enquire",
+        "text": "Send us your details or call the college office."
+       },
+       {
+        "title": "Choose a course",
+        "text": "Pick the program that fits your interest."
+       },
+       {
+        "title": "Submit documents",
+        "text": "Bring your certificates for verification."
+       },
+       {
+        "title": "Confirm",
+        "text": "Complete the formalities and join."
+       }
+      ]
+     }
+    },
+    {
+     "type": "two_column",
+     "data": {
+      "tone": "alt",
+      "heading": "Eligibility, dates and FAQs",
+      "main": [
+       {
+        "type": "key_value",
+        "data": {
+         "rows": [
+          {
+           "label": "Eligibility",
+           "value": "To be provided by the college"
+          },
+          {
+           "label": "Application opens",
+           "value": "To be announced"
+          },
+          {
+           "label": "Last date",
+           "value": "To be announced"
+          }
+         ]
+        }
+       },
+       {
+        "type": "faq",
+        "data": {
+         "items": [
+          {
+           "question": "Which documents do I need?",
+           "answer": "Sample answer. The college will list the required documents here."
+          },
+          {
+           "question": "Can I visit the campus first?",
+           "answer": "Sample answer. Yes, visitors are welcome during office hours."
+          },
+          {
+           "question": "Are scholarships available?",
+           "answer": "Sample answer. Details will be added by the college."
+          }
+         ]
+        }
+       }
+      ],
+      "aside": [
+       {
+        "type": "enquiry_form",
+        "data": {
+         "title": "Enquire now"
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "key": "activities",
+   "slug": "activities",
+   "title": "Activities",
+   "seoTitle": "Student activities",
+   "seoDescription": "Leo Club and NSS activities of VRR Degree College, Kallur.",
+   "noindex": false,
+   "sections": [
+    {
+     "type": "page_header",
+     "data": {
+      "title": "Student activities",
+      "subtitle": "Leo Club and NSS activities by the students of VRR Degree College."
+     }
+    },
+    {
+     "type": "collection_list",
+     "data": {
+      "collection": "activities",
+      "layout": "albums"
+     }
+    }
+   ]
+  },
+  {
+   "key": "gallery",
+   "slug": "gallery",
+   "title": "Gallery",
+   "seoTitle": "Gallery",
+   "seoDescription": "Photos from VRR Degree College, Kallur.",
+   "noindex": false,
+   "sections": [
+    {
+     "type": "page_header",
+     "data": {
+      "title": "Gallery",
+      "subtitle": "Campus life in photos."
+     }
+    },
+    {
+     "type": "collection_list",
+     "data": {
+      "collection": "gallery",
+      "layout": "mosaic",
+      "heading": "Around the campus"
+     }
+    }
+   ]
+  },
+  {
+   "key": "news",
+   "slug": "news",
+   "title": "News",
+   "seoTitle": "News and notices",
+   "seoDescription": "Latest news, notices and circulars from VRR Degree College, Kallur.",
+   "noindex": false,
+   "sections": [
+    {
+     "type": "page_header",
+     "data": {
+      "title": "News & notices",
+      "subtitle": "Circulars, events and announcements."
+     }
+    },
+    {
+     "type": "two_column",
+     "data": {
+      "main": [
+       {
+        "type": "collection_list",
+        "data": {
+         "collection": "news",
+         "layout": "list"
+        }
+       }
+      ],
+      "aside": [
+       {
+        "type": "panel",
+        "data": {
+         "title": "Categories",
+         "list": [
+          "Admission",
+          "Notice",
+          "Event",
+          "Exam",
+          "Leo Club & activities"
+         ]
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "key": "contact",
+   "slug": "contact",
+   "title": "Contact",
+   "seoTitle": "Contact",
+   "seoDescription": "Address, phone and enquiry form for VRR Degree College, Piler Road, Kallur.",
+   "noindex": false,
+   "sections": [
+    {
+     "type": "page_header",
+     "data": {
+      "title": "Contact us",
+      "subtitle": "We would be happy to hear from you."
+     }
+    },
+    {
+     "type": "two_column",
+     "data": {
+      "main": [
+       {
+        "type": "contact_info",
+        "data": {}
+       },
+       {
+        "type": "map",
+        "data": {
+         "title": "Find us on the map"
+        }
+       }
+      ],
+      "aside": [
+       {
+        "type": "enquiry_form",
+        "data": {
+         "title": "Send an enquiry"
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "key": "privacy",
+   "slug": "privacy",
+   "title": "Privacy policy",
+   "seoTitle": "Privacy policy",
+   "seoDescription": "How VRR Degree College handles your information.",
+   "noindex": true,
+   "sections": [
+    {
+     "type": "page_header",
+     "data": {
+      "title": "Privacy policy",
+      "subtitle": "How we handle your information."
+     }
+    },
+    {
+     "type": "rich_text",
+     "data": {
+      "body": {
+       "type": "doc",
+       "content": [
+        {
+         "type": "paragraph",
+         "content": [
+          {
+           "type": "text",
+           "text": "Draft for approval by the college."
+          }
+         ]
+        },
+        {
+         "type": "heading",
+         "attrs": {
+          "level": 2
+         },
+         "content": [
+          {
+           "type": "text",
+           "text": "What we collect"
+          }
+         ]
+        },
+        {
+         "type": "paragraph",
+         "content": [
+          {
+           "type": "text",
+           "text": "When you send the enquiry form we collect your name, mobile number, the course you are interested in and an optional message."
+          }
+         ]
+        },
+        {
+         "type": "heading",
+         "attrs": {
+          "level": 2
+         },
+         "content": [
+          {
+           "type": "text",
+           "text": "Why we collect it"
+          }
+         ]
+        },
+        {
+         "type": "paragraph",
+         "content": [
+          {
+           "type": "text",
+           "text": "Only to call you back about admissions and answer your questions."
+          }
+         ]
+        },
+        {
+         "type": "heading",
+         "attrs": {
+          "level": 2
+         },
+         "content": [
+          {
+           "type": "text",
+           "text": "Who can see it"
+          }
+         ]
+        },
+        {
+         "type": "bulletList",
+         "content": [
+          {
+           "type": "listItem",
+           "content": [
+            {
+             "type": "paragraph",
+             "content": [
+              {
+               "type": "text",
+               "text": "College staff who handle admissions."
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "type": "listItem",
+           "content": [
+            {
+             "type": "paragraph",
+             "content": [
+              {
+               "type": "text",
+               "text": "We do not sell your details or share them with advertisers."
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "type": "heading",
+         "attrs": {
+          "level": 2
+         },
+         "content": [
+          {
+           "type": "text",
+           "text": "How long we keep it"
+          }
+         ]
+        },
+        {
+         "type": "paragraph",
+         "content": [
+          {
+           "type": "text",
+           "text": "Enquiries are deleted after 12 months."
+          }
+         ]
+        },
+        {
+         "type": "heading",
+         "attrs": {
+          "level": 2
+         },
+         "content": [
+          {
+           "type": "text",
+           "text": "Your choices"
+          }
+         ]
+        },
+        {
+         "type": "paragraph",
+         "content": [
+          {
+           "type": "text",
+           "text": "You can ask the college office to show, correct or delete your enquiry at any time."
+          }
+         ]
+        },
+        {
+         "type": "heading",
+         "attrs": {
+          "level": 2
+         },
+         "content": [
+          {
+           "type": "text",
+           "text": "Cookies"
+          }
+         ]
+        },
+        {
+         "type": "paragraph",
+         "content": [
+          {
+           "type": "text",
+           "text": "This website does not use advertising or tracking cookies."
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "media": [
+  {
+   "key": "logo",
+   "file": "logo.png",
+   "mime": "image/png",
+   "alt": "VRR Degree College logo",
+   "width": 439,
+   "height": 512,
+   "cropBottom": false
+  },
+  {
+   "key": "campus-1",
+   "file": "campus-1.jpg",
+   "mime": "image/jpeg",
+   "alt": "VRR Degree College building with the college bus",
+   "width": 1156,
+   "height": 868,
+   "cropBottom": false
+  },
+  {
+   "key": "nss-1",
+   "file": "nss-1.jpg",
+   "mime": "image/jpeg",
+   "alt": "NSS volunteers with the unit banner",
+   "width": 1280,
+   "height": 588,
+   "cropBottom": true
+  },
+  {
+   "key": "nss-3",
+   "file": "nss-3.jpg",
+   "mime": "image/jpeg",
+   "alt": "Volunteers carrying a cleared shrub",
+   "width": 1280,
+   "height": 588,
+   "cropBottom": true
+  },
+  {
+   "key": "nss-4",
+   "file": "nss-4.jpg",
+   "mime": "image/jpeg",
+   "alt": "Volunteers dragging cleared branches",
+   "width": 1280,
+   "height": 588,
+   "cropBottom": true
+  },
+  {
+   "key": "nss-5",
+   "file": "nss-5.jpg",
+   "mime": "image/jpeg",
+   "alt": "NSS volunteer team",
+   "width": 1280,
+   "height": 588,
+   "cropBottom": true
+  },
+  {
+   "key": "nss-2",
+   "file": "nss-2.jpg",
+   "mime": "image/jpeg",
+   "alt": "NSS volunteers with the banner",
+   "width": 1280,
+   "height": 588,
+   "cropBottom": true
+  },
+  {
+   "key": "nss-6",
+   "file": "nss-6.jpg",
+   "mime": "image/jpeg",
+   "alt": "Volunteers clearing the field",
+   "width": 1280,
+   "height": 588,
+   "cropBottom": true
+  },
+  {
+   "key": "nss-7",
+   "file": "nss-7.jpg",
+   "mime": "image/jpeg",
+   "alt": "NSS volunteers and the banner",
+   "width": 1280,
+   "height": 588,
+   "cropBottom": true
+  },
+  {
+   "key": "leo-1",
+   "file": "leo-1.jpg",
+   "mime": "image/jpeg",
+   "alt": "Leo Club members with the club banner",
+   "width": 1400,
+   "height": 934,
+   "cropBottom": false
+  },
+  {
+   "key": "campus-2",
+   "file": "campus-2.jpg",
+   "mime": "image/jpeg",
+   "alt": "VRR Degree College building, front view",
+   "width": 1156,
+   "height": 868,
+   "cropBottom": false
+  },
+  {
+   "key": "campus-4",
+   "file": "campus-4.jpg",
+   "mime": "image/jpeg",
+   "alt": "Corner view of the college building",
+   "width": 1156,
+   "height": 868,
+   "cropBottom": false
+  },
+  {
+   "key": "campus-5",
+   "file": "campus-5.jpg",
+   "mime": "image/jpeg",
+   "alt": "Side view of the college building",
+   "width": 1156,
+   "height": 868,
+   "cropBottom": false
+  },
+  {
+   "key": "campus-3",
+   "file": "campus-3.jpg",
+   "mime": "image/jpeg",
+   "alt": "Front view of the college building",
+   "width": 1156,
+   "height": 868,
+   "cropBottom": false
+  }
+ ]
+}

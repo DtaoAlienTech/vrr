@@ -38,12 +38,14 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   // partialPrefetching is off on purpose: with it, the first visit to an unknown address gets an
   // instant shell with status 200 (a "soft 404"). Without it the real 404 status is sent at once.
-  // The Docker image sets BUILD_STANDALONE=1 (Phase 5). Locally, plain `next start` is used.
-  ...(process.env.BUILD_STANDALONE ? { output: "standalone" as const } : {}),
   poweredByHeader: false,
   reactStrictMode: true,
   async rewrites() {
-    return [{ source: "/api/:path*", destination: `${backendUrl}/api/:path*` }];
+    // In Docker, Caddy answers /api and /uploads itself; these are for development without it.
+    return [
+      { source: "/api/:path*", destination: `${backendUrl}/api/:path*` },
+      { source: "/uploads/:path*", destination: `${backendUrl}/uploads/:path*` },
+    ];
   },
   async headers() {
     return [
