@@ -65,6 +65,9 @@ services:
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
       # 1 = add the starter content when the database is empty (never touches existing content)
       SEED_ON_START: ${SEED_ON_START:-1}
+      # Development only (the backend refuses to start with these set when ENV=prod)
+      DEV_ADMIN_EMAIL: ${DEV_ADMIN_EMAIL:-}
+      DEV_ADMIN_PASSWORD: ${DEV_ADMIN_PASSWORD:-}
     volumes:
       - uploads:/data/uploads
       - originals:/data/originals

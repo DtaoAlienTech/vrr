@@ -61,12 +61,23 @@ class Settings(BaseSettings):
     smtp_password: SecretStr | None = None
     mail_from: str = ""
 
+    # A ready-made staff account for trying the site on your own computer. It may use a short
+    # password, so the backend refuses to start with these set when ENV=prod.
+    dev_admin_email: str = ""
+    dev_admin_password: SecretStr | None = None
+
     @model_validator(mode="after")
     def _no_password_without_encryption(self) -> "Settings":
         if self.smtp_security == "none" and (self.smtp_user or self.smtp_password):
             raise ValueError(
                 "SMTP_SECURITY=none never sends a password: use starttls or ssl with a login"
             )
+        return self
+
+    @model_validator(mode="after")
+    def _no_dev_account_in_production(self) -> "Settings":
+        if self.env == "prod" and (self.dev_admin_email or self.dev_admin_password):
+            raise ValueError("DEV_ADMIN_EMAIL / DEV_ADMIN_PASSWORD must be empty when ENV=prod")
         return self
 
     @model_validator(mode="after")

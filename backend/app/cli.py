@@ -8,6 +8,7 @@
   python -m app.cli media-reprocess [--all]      make the resized copies of photos that lack them
   python -m app.cli media-cleanup [--dry-run]    delete files that no library entry refers to
   python -m app.cli send-test-email [--to ...]   send a test email with the SMTP settings
+  python -m app.cli ensure-dev-admin             (development only) create the DEV_ADMIN_* account
 
 Passwords are asked for on the keyboard (never as an argument, which shell history would keep).
 For scripts, set the ADMIN_PASSWORD environment variable instead.
@@ -93,6 +94,37 @@ def create_admin(*, email: str, name: str, role: str) -> int:
     print(f"Created {role} {email}.")
     if role == Role.SUPER_ADMIN:
         print("Sign in, then turn on two-factor login (required for super admins).")
+    return 0
+
+
+def ensure_dev_admin() -> int:
+    """Creates the ready-made account from DEV_ADMIN_EMAIL / DEV_ADMIN_PASSWORD, for trying the site
+    on your own computer. Runs at every start, only creates (never changes an existing account),
+    skips the password-strength rule, and does nothing unless both are set and ENV is not prod
+    (the settings refuse to load with them set in production)."""
+    settings = get_settings()
+    email = settings.dev_admin_email.strip().lower()
+    password = settings.dev_admin_password.get_secret_value() if settings.dev_admin_password else ""
+    if not email or not password:
+        return 0
+    if settings.is_prod or not _EMAIL.match(email):
+        print("Development account skipped: not allowed here, or the e-mail is not valid.")
+        return 1
+    with SessionLocal() as db:
+        if db.scalar(select(User).where(User.email == email)):
+            print(f"Development account {email} already exists.")
+            return 0
+        user = User(
+            email=email,
+            name="Admin",
+            password_hash=security.hash_password(password),
+            role=Role.SUPER_ADMIN.value,
+        )
+        db.add(user)
+        db.flush()
+        audit.record(db, "user_created_dev", user_id=user.id, entity="user", entity_id=user.id)
+        db.commit()
+    print(f"Development account created: {email} (super admin, short password: local use only).")
     return 0
 
 
@@ -273,12 +305,16 @@ def main() -> int:
         "--min-age-minutes", type=int, default=60, help="keep newer files (uploads in progress)"
     )
 
+    commands.add_parser("ensure-dev-admin", help="create the DEV_ADMIN_* account (development)")
+
     mail_parser = commands.add_parser("send-test-email", help="send a test email")
     mail_parser.add_argument("--to", help="default: ENQUIRY_TO_EMAIL")
 
     args = parser.parse_args()
     if args.command == "send-test-email":
         return send_test_mail(to=args.to)
+    if args.command == "ensure-dev-admin":
+        return ensure_dev_admin()
     if args.command == "seed":
         return seed(if_empty=args.if_empty)
     if args.command == "reset-two-factor":

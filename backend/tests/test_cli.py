@@ -149,3 +149,80 @@ def test_the_default_role_is_super_admin(monkeypatch, db_session):
         sys, "argv", ["cli", "create-admin", "--email", "def@example.org", "--name", "Def"]
     )
     assert cli.main() == 0 and user_by_email(db_session, "def@example.org").role == "super_admin"
+
+
+# ---- the ready-made development account ----
+
+
+def dev_settings(monkeypatch, **changes):
+    from app.core.config import Settings
+
+    values = {"env": "dev", "dev_admin_email": "Admin@Gmail.com", "dev_admin_password": "vrr@123"}
+    monkeypatch.setattr(cli, "get_settings", lambda: Settings(**{**values, **changes}))
+
+
+def test_the_dev_account_is_created_with_its_short_password(monkeypatch, db_session, capsys):
+    dev_settings(monkeypatch)
+    assert cli.ensure_dev_admin() == 0
+    user = user_by_email(db_session, "admin@gmail.com")
+    assert user.role == "super_admin" and user.is_active and user.totp_enabled is False
+    assert security.verify_password(user.password_hash, "vrr@123")
+    assert "vrr@123" not in user.password_hash and "vrr@123" not in capsys.readouterr().out
+    assert db_session.scalars(select(AuditLog).where(AuditLog.action == "user_created_dev")).one()
+
+
+def test_the_dev_account_can_sign_in_but_must_set_up_two_factor_first(api, monkeypatch):
+    from tests.helpers import sign_in
+
+    dev_settings(monkeypatch)
+    cli.ensure_dev_admin()
+    response = sign_in(api, email="admin@gmail.com", password="vrr@123")
+    assert response.status_code == 200 and response.json()["user"]["needsTotpSetup"] is True
+    assert sign_in(api, email="admin@gmail.com", password="vrr@1234").status_code == 401
+
+
+def test_the_dev_account_is_never_changed_once_it_exists(monkeypatch, db_session, capsys):
+    dev_settings(monkeypatch)
+    cli.ensure_dev_admin()
+    user = user_by_email(db_session, "admin@gmail.com")
+    user.name, user.password_hash = "Renamed", security.hash_password(PASSWORD)
+    db_session.flush()
+    assert cli.ensure_dev_admin() == 0 and "already exists" in capsys.readouterr().out
+    again = user_by_email(db_session, "admin@gmail.com")
+    assert again.name == "Renamed" and security.verify_password(again.password_hash, PASSWORD)
+    assert len(db_session.scalars(select(User).where(User.email == "admin@gmail.com")).all()) == 1
+
+
+@pytest.mark.parametrize(
+    "changes", [{"dev_admin_email": ""}, {"dev_admin_password": None}, {"dev_admin_password": ""}]
+)
+def test_nothing_is_created_unless_both_are_set(monkeypatch, db_session, changes):
+    dev_settings(monkeypatch, **changes)
+    assert cli.ensure_dev_admin() == 0
+    assert db_session.scalars(select(User)).all() == []
+
+
+def test_a_wrong_dev_email_is_refused(monkeypatch, db_session, capsys):
+    dev_settings(monkeypatch, dev_admin_email="not-an-email")
+    assert cli.ensure_dev_admin() == 1 and db_session.scalars(select(User)).all() == []
+    assert "skipped" in capsys.readouterr().out
+
+
+def test_production_refuses_to_start_with_a_dev_account_set():
+    from pydantic import ValidationError
+
+    from app.core.config import Settings
+
+    long_key = "k" * 40
+    with pytest.raises(ValidationError, match="must be empty when ENV=prod"):
+        Settings(env="prod", secret_key=long_key, dev_admin_email="admin@gmail.com")
+    with pytest.raises(ValidationError, match="must be empty when ENV=prod"):
+        Settings(env="prod", secret_key=long_key, dev_admin_password="vrr@123")
+    # fine without them (the values in the local .env file are set aside here on purpose)
+    Settings(env="prod", secret_key=long_key, dev_admin_email="", dev_admin_password=None)
+
+
+def test_the_normal_way_still_refuses_a_short_password(monkeypatch, capsys):
+    monkeypatch.setenv("ADMIN_PASSWORD", "vrr@123")
+    assert cli.create_admin(email="x@example.org", name="X", role="editor") == 1
+    assert "at least 12" in capsys.readouterr().err

@@ -112,6 +112,14 @@ PASSWORD = "correct horse battery staple"
 
 
 @pytest.fixture(autouse=True)
+def _ignore_the_local_dev_account(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The local .env may hold DEV_ADMIN_* (a ready-made account for trying the site). Tests must
+    not depend on it: with it set, a "prod" Settings object correctly refuses to load."""
+    monkeypatch.setenv("DEV_ADMIN_EMAIL", "")
+    monkeypatch.setenv("DEV_ADMIN_PASSWORD", "")
+
+
+@pytest.fixture(autouse=True)
 def _fast_password_hashing(monkeypatch: pytest.MonkeyPatch) -> None:
     """Argon2 is slow on purpose. Tests use the cheapest settings so the suite stays fast; the
     real settings are checked separately in test_security_core.py."""

@@ -50,7 +50,7 @@ docker compose exec backend python -m app.cli media-cleanup --dry-run   # list f
 
 1. `cp .env.example .env`, replace every `CHANGE_ME` (see "Secrets"), then `docker compose up -d --build` and wait until `docker compose ps` shows all four containers healthy.
 2. Public site: **http://localhost:3000** (home, courses, faculty, news, gallery, admissions, contact, privacy). Try the phone view too (browser dev tools, narrow window).
-3. Create your admin (below), then sign in at **http://localhost:3000/admin**.
+3. Sign in at **http://localhost:3000/admin** with the ready-made account (below), or create your own admin.
 4. Try these, and check each one on the public site in a second tab:
    - **News and notices:** add a news item, publish it, then change its web address (slug). The old address now sends visitors to the new one.
    - **Draft preview:** open any page or news item, press **Preview**. It opens the saved draft in a new tab with an orange "Draft preview" bar; the link stops working after 30 minutes and is never shown to search engines.
@@ -58,6 +58,12 @@ docker compose exec backend python -m app.cli media-cleanup --dry-run   # list f
    - **Photos:** upload a photo in the media library (big camera photos are resized automatically).
    - **Enquiry:** fill in the enquiry form on the public site, then look under **Enquiries** in the admin panel. To also see the email, follow "Try the enquiry email".
 5. Start again from a clean site whenever you like: `docker compose down -v && docker compose up -d --build` (this deletes the database and uploads).
+
+### Ready-made account for local testing
+
+With `DEV_ADMIN_EMAIL` and `DEV_ADMIN_PASSWORD` in `.env` (the local `.env` has `admin@gmail.com` / `vrr@123`), the backend creates that super admin when it starts, if it does not exist yet. It is never changed afterwards, so a password you change in the admin panel stays. The first sign-in asks you to set up two-factor login (an authenticator app on your phone): super admins cannot skip it.
+
+This is for your own computer only: the password is short and public. The backend **refuses to start** when `ENV=prod` and these two lines are still set, so remove them (and create your real account below) before going live.
 
 ### First admin account
 
