@@ -33,6 +33,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [signingOut, setSigningOut] = useState(false);
   const items = NAV.filter((item) => !item.role || item.role === user.role);
+  const locked = user.needsTotpSetup;
 
   return (
     <>
@@ -68,8 +69,18 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
       <div className="adm-body">
         <nav className="adm-side" aria-label="Admin">
+          {locked && <p className="adm-lock-note">Locked until you set up two-factor login.</p>}
           {items.map((item) => {
             const active = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            // Until two-factor login is on, a super admin can only reach "My account": show the other
+            // entries as locked instead of letting a click silently bounce back.
+            if (locked && item.href !== "/admin/account") {
+              return (
+                <span key={item.href} className="locked" aria-disabled="true" title="Set up two-factor login first">
+                  {item.label}
+                </span>
+              );
+            }
             return (
               <Link key={item.href} href={item.href} className={cx(active && "on")} aria-current={active ? "page" : undefined}>
                 {item.label}

@@ -61,7 +61,15 @@ docker compose exec backend python -m app.cli media-cleanup --dry-run   # list f
 
 ### Ready-made account for local testing
 
-With `DEV_ADMIN_EMAIL` and `DEV_ADMIN_PASSWORD` in `.env` (the local `.env` has `admin@gmail.com` / `vrr@123`), the backend creates that super admin when it starts, if it does not exist yet. It is never changed afterwards, so a password you change in the admin panel stays. The first sign-in asks you to set up two-factor login (an authenticator app on your phone): super admins cannot skip it.
+With `DEV_ADMIN_EMAIL` and `DEV_ADMIN_PASSWORD` in `.env` (the local `.env` has `admin@gmail.com` / `vrr@123`), the backend creates that super admin when it starts, if it does not exist yet. It is never changed afterwards, so a password you change in the admin panel stays. The first sign-in asks you to set up two-factor login (an authenticator app on your phone): super admins cannot skip it, and until it is on, the other menu entries stay locked.
+
+No authenticator app at hand? For local testing the code can come from the backend container. On the "Set up two-factor login" screen copy the long key, then run (each time you sign in, run it again for a fresh code):
+
+```bash
+docker compose exec backend python -c "import pyotp; print(pyotp.TOTP('PASTE_THE_KEY_HERE').now())"
+```
+
+Type the 6 digits into the page. Save the recovery codes it shows (they are the way back in if the key is lost).
 
 This is for your own computer only: the password is short and public. The backend **refuses to start** when `ENV=prod` and these two lines are still set, so remove them (and create your real account below) before going live.
 

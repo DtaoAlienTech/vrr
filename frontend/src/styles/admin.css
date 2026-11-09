@@ -64,6 +64,9 @@ body:has(.adm){padding-bottom:0;background:#F3F4F6}
 .alink:disabled{opacity:.6;cursor:default}
 .alink-light{color:#e8dcc0}
 .adm-side a:hover{background:var(--soft)}
+.adm-side .locked{display:block;padding:12px 18px;color:var(--muted);opacity:.5;cursor:not-allowed;white-space:nowrap;border-left:3px solid transparent;font-weight:500}
+.adm-lock-note{margin:0;padding:6px 18px 10px;font-size:.8rem;line-height:1.35;color:#7a5a00;white-space:normal;max-width:220px}
+@media(max-width:899px){.adm-lock-note{display:none}}
 .adm-side{position:sticky;top:0;align-self:start}
 @media(max-width:899px){.adm-side{position:static}}
 .adm-main h1{margin-bottom:.15em}
