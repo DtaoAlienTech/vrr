@@ -63,7 +63,9 @@ docker compose exec backend python -m app.cli media-cleanup --dry-run   # list f
 
 With `DEV_ADMIN_EMAIL` and `DEV_ADMIN_PASSWORD` in `.env` (the local `.env` has `admin@gmail.com` / `vrr@123`), the backend creates that super admin when it starts, if it does not exist yet. It is never changed afterwards, so a password you change in the admin panel stays. The first sign-in asks you to set up two-factor login (an authenticator app on your phone): super admins cannot skip it, and until it is on, the other menu entries stay locked.
 
-No authenticator app at hand? For local testing the code can come from the backend container. On the "Set up two-factor login" screen copy the long key, then run (each time you sign in, run it again for a fresh code):
+On the setup screen, open the authenticator app on your phone, choose "Add account" → "Scan a QR code" and point the camera at the picture (it is drawn in your browser; the key never goes to another website). If you cannot scan, the same screen shows the key to type in.
+
+No authenticator app at hand? For local testing the code can come from the backend container. Copy the long key from the setup screen, then run (each time you sign in, run it again for a fresh code):
 
 ```bash
 docker compose exec backend python -c "import pyotp; print(pyotp.TOTP('PASTE_THE_KEY_HERE').now())"

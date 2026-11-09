@@ -32,9 +32,10 @@ def signed_in(api: TestClient, **kwargs: Any) -> str:
     return response.json()["csrfToken"]
 
 
-def code_for(secret: str, offset: int = 0) -> str:
-    """The authenticator app's code for the current 30-second step (+ offset steps)."""
-    return pyotp.TOTP(secret).generate_otp(int(time.time()) // 30 + offset)
+def code_for(secret: str, offset: int = 0, at: float | None = None) -> str:
+    """The authenticator app's code for the current 30-second step (+ offset steps). `at` is a
+    moment in time (default: now), for tests that freeze the clock."""
+    return pyotp.TOTP(secret).generate_otp(int(time.time() if at is None else at) // 30 + offset)
 
 
 def secret_of(user: User) -> str:

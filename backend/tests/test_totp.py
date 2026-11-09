@@ -1,6 +1,8 @@
 """Two-factor login: setup, one-time codes, replay protection, recovery codes, turning it off."""
 
 import re
+import time
+from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy import select
@@ -9,6 +11,7 @@ from app.api.cookies import ACCESS_COOKIE
 from app.core import security
 from app.core.config import get_settings
 from app.models import AuditLog
+from app.services import auth as auth_service
 from tests.conftest import PASSWORD
 from tests.helpers import changes, code_for, secret_of, sign_in, signed_in
 
@@ -162,12 +165,16 @@ def test_the_code_from_the_setup_cannot_be_reused_to_sign_in(api, protected):
     ("offset", "accepted"), [(-2, False), (-1, True), (0, True), (1, True), (2, False)]
 )
 def test_codes_are_accepted_one_step_either_side_for_clock_drift(
-    api, protected, db_session, offset, accepted
+    api, protected, db_session, monkeypatch, offset, accepted
 ):
     user, _ = protected
     user.totp_last_step = None  # (forget the setup code, to test the time window on its own)
     db_session.flush()
-    response = sign_in(api, totpCode=code_for(secret_of(user), offset))
+    # The test and the server must agree on the time. With the real clock, a new 30-second step
+    # starting between the two readings made the "-1" and "+2" cases fail now and then.
+    middle_of_a_step = (int(time.time()) // 30) * 30 + 15
+    monkeypatch.setattr(auth_service, "_now", lambda: datetime.fromtimestamp(middle_of_a_step, UTC))
+    response = sign_in(api, totpCode=code_for(secret_of(user), offset, at=middle_of_a_step))
     assert (response.status_code == 200) is accepted
 
 

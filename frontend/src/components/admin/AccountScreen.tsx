@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { api } from "@/lib/admin/api";
 import { ApiProblem } from "@/lib/admin/problem";
 import { useFeedback } from "./feedback";
+import { QrCode } from "./QrCode";
 import { useSession, useUser } from "./session";
 import { Button, Card, Field, Heading, Notice } from "./ui";
 
@@ -199,12 +200,16 @@ function TwoFactor() {
               Install an authenticator app on your phone (Google Authenticator, Microsoft Authenticator, Authy …).
             </li>
             <li>
-              In the app choose “Add account” → “Enter a setup key”, and type this key:
+              In the app choose “Add account” → “Scan a QR code” and point the camera at this picture:
+              <QrCode value={setup.otpauthUri} label="QR code for the authenticator app" />
+            </li>
+            <li>
+              Cannot scan it? Choose “Enter a setup key” instead and type this key:
               <div className="setupkey" data-testid="setup-key">
                 {groupKey(setup.secret)}
               </div>
               <a className="alink" href={setup.otpauthUri}>
-                On a phone? Open it in the authenticator app
+                On this phone? Open it in the authenticator app
               </a>
             </li>
             <li>Type the 6-digit code the app shows:</li>

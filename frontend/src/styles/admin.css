@@ -263,3 +263,6 @@ code{font-size:.88em}
 .enq-actions{white-space:nowrap}
 .asub{font-size:.98rem;margin:18px 0 8px}
 .redirect-form{max-width:460px;margin-bottom:18px}
+
+/* Two-factor setup QR code */
+.qrcode{display:block;width:230px;max-width:100%;height:auto;margin:10px 0;border:1px solid var(--line);border-radius:8px;background:#fff}
