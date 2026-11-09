@@ -60,14 +60,6 @@ def dirs(tmp_path, monkeypatch, empty_content) -> Dirs:
 
 
 @pytest.fixture
-def refreshes(monkeypatch) -> list[list[str]]:
-    """Records the 'refresh these pages' messages instead of sending them."""
-    sent: list[list[str]] = []
-    monkeypatch.setattr(revalidate, "notify", lambda settings, tags, **_: sent.append(tags) or True)
-    return sent
-
-
-@pytest.fixture
 def staff(api, make_user) -> str:
     make_user()
     return signed_in(api)

@@ -1,12 +1,13 @@
 from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
-from app.core.errors import ApiError, api_error_handler
+from app.core.errors import ApiError, api_error_handler, validation_error_handler
 from app.core.limits import LimitRequestBody
 from app.core.logging import configure_logging, new_request_id, request_id_var
 
@@ -33,6 +34,7 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_host_list)
     app.add_exception_handler(ApiError, api_error_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(RequestValidationError, validation_error_handler)  # type: ignore[arg-type]
     app.add_middleware(
         LimitRequestBody,
         api_prefix=settings.api_prefix,

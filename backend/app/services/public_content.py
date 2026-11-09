@@ -261,7 +261,10 @@ def list_faculty(db: Session, media: MediaLookup, department: str | None) -> lis
 def _published_news():
     return (
         select(News)
-        .where(News.status == PublishStatus.PUBLISHED.value, News.published_at <= func.now())
+        .where(
+            News.status == PublishStatus.PUBLISHED.value,
+            News.published_at <= func.clock_timestamp(),
+        )
         .options(selectinload(News.attachments))
         .order_by(News.is_pinned.desc(), News.published_at.desc(), News.id.desc())
     )

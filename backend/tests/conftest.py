@@ -1,4 +1,6 @@
 from collections.abc import Iterator
+from dataclasses import dataclass
+from typing import Any
 
 import pytest
 from argon2 import PasswordHasher
@@ -13,9 +15,11 @@ from app.main import app
 from app.models import (
     Activity,
     ActivityPhoto,
+    AuditLog,
     ContentRevision,
     Course,
     Department,
+    Enquiry,
     Faculty,
     GalleryItem,
     Media,
@@ -26,8 +30,10 @@ from app.models import (
     Redirect,
     SiteSetting,
     User,
+    UserSession,
 )
 from app.seed.loader import load_seed
+from app.services import revalidate
 
 
 @pytest.fixture(scope="session")
@@ -45,6 +51,12 @@ def db_session() -> Iterator[Session]:
     session = Session(
         bind=connection, join_transaction_mode="create_savepoint", expire_on_commit=False
     )
+    # Real accounts, logins and logs may exist in the development database. Every test starts
+    # without them (removed inside the transaction, which is rolled back), so results never
+    # depend on what was done by hand.
+    for model in (UserSession, AuditLog, ContentRevision, Redirect, Enquiry, User):
+        session.execute(delete(model))
+    session.flush()
     try:
         yield session
     finally:
@@ -140,3 +152,63 @@ def proxied(monkeypatch: pytest.MonkeyPatch):
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
+
+
+@pytest.fixture
+def refreshes(monkeypatch: pytest.MonkeyPatch) -> list[list[str]]:
+    """Records the "refresh these pages" messages instead of sending them."""
+    sent: list[list[str]] = []
+    monkeypatch.setattr(revalidate, "notify", lambda settings, tags, **_: sent.append(tags) or True)
+    return sent
+
+
+@dataclass
+class Admin:
+    """A signed-in member of staff: calls /api/v1/admin/... the way the admin page does."""
+
+    api: TestClient
+    csrf: str
+
+    def _url(self, path: str) -> str:
+        return f"/api/v1/admin{path}"
+
+    def _headers(self) -> dict[str, str]:
+        return {"X-CSRF-Token": self.csrf, "Origin": "http://localhost"}
+
+    def get(self, path: str, **params: Any):
+        return self.api.get(self._url(path), params=params)
+
+    def post(self, path: str, json: Any = None, **kwargs: Any):
+        return self.api.post(self._url(path), json=json, headers=self._headers(), **kwargs)
+
+    def put(self, path: str, json: Any = None):
+        return self.api.put(self._url(path), json=json, headers=self._headers())
+
+    def patch(self, path: str, json: Any = None):
+        return self.api.patch(self._url(path), json=json, headers=self._headers())
+
+    def delete(self, path: str):
+        return self.api.delete(self._url(path), headers=self._headers())
+
+
+@pytest.fixture
+def editor(api: TestClient, make_user) -> Admin:
+    from tests.helpers import signed_in
+
+    make_user("editor@example.org", name="Edith Editor")
+    return Admin(api, signed_in(api, email="editor@example.org"))
+
+
+@pytest.fixture
+def boss(api: TestClient, make_user) -> Admin:
+    """A super admin (two-factor on), signed in on a separate browser: both can act at once."""
+    from tests.helpers import code_for, signed_in
+
+    secret = "JBSWY3DPEHPK3PXP"
+    make_user(
+        "boss@example.org", role="super_admin", name="Bo Boss", totp_enabled=True,
+        totp_secret=security.encrypt_secret(get_settings(), secret),
+    )  # fmt: skip
+    browser = TestClient(app, base_url="http://localhost")  # (uses the same test database)
+    csrf = signed_in(browser, email="boss@example.org", totpCode=code_for(secret))
+    return Admin(browser, csrf)

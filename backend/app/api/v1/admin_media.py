@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, File, Form, Query, Request, UploadFile, status
+from fastapi import APIRouter, File, Form, Query, Request, UploadFile, status
 from pydantic import TypeAdapter, ValidationError
 from sqlalchemy import select
 
@@ -137,7 +137,6 @@ def update_media(
     media_id: int,
     payload: MediaUpdateIn,
     request: Request,
-    background: BackgroundTasks,
     auth: Staff,
     db: DbSession,
 ):
@@ -161,7 +160,7 @@ def update_media(
     )
     db.commit()
     # pages show the alt text and the date-stamp crop, so they must be refreshed
-    background.add_task(revalidate.notify, settings, revalidate.ALL_TAGS)
+    revalidate.notify(settings, revalidate.ALL_TAGS)
     return _out(row)
 
 

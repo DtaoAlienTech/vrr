@@ -60,6 +60,12 @@ class PageKey(StrEnum):
     PRIVACY = "privacy"
 
 
+class EnquiryStatus(StrEnum):
+    NEW = "new"
+    CONTACTED = "contacted"
+    CLOSED = "closed"
+
+
 class RevisionAction(StrEnum):
     CREATE = "create"
     UPDATE = "update"

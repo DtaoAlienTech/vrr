@@ -4,10 +4,12 @@ import re
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from sqlalchemy import select
 
 from app.api.deps import DbSession
 from app.core.config import get_settings
 from app.db.base import SLUG_REGEX
+from app.models import Redirect
 from app.models.enums import ActivityGroup, GalleryCategory, NewsCategory, PageKey
 from app.schemas.public import (
     ActivityOut,
@@ -17,6 +19,7 @@ from app.schemas.public import (
     NewsOut,
     PageOut,
     PageSummaryOut,
+    RedirectPublicOut,
     SettingsOut,
 )
 from app.services import public_content as content
@@ -143,3 +146,12 @@ def read_activities(
 @router.get("/gallery", response_model=list[GalleryOut], response_model_exclude_none=True)
 def read_gallery(db: DbSession, media: Media, category: GalleryCategory | None = None):
     return content.list_gallery(db, media, category.value if category else None)
+
+
+@router.get("/redirects", response_model=list[RedirectPublicOut])
+def read_redirects(db: DbSession):
+    """Old address -> new address (made when a page, course or news item changes its address)."""
+    rows = db.scalars(select(Redirect).order_by(Redirect.id).limit(2000))
+    return [
+        {"from_path": r.from_path, "to_path": r.to_path, "status_code": r.status_code} for r in rows
+    ]

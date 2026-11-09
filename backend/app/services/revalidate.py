@@ -1,6 +1,6 @@
 """Tells the website that some cached pages are out of date (see the website's
 /internal/revalidate route). Best effort: if the website does not answer, the change is still
-saved and the website refreshes itself within the hour."""
+saved and the website refreshes itself within the hour. The call waits at most 3 seconds."""
 
 import logging
 
@@ -21,7 +21,7 @@ def notify(
     if not settings.revalidate_url or settings.revalidate_secret is None:
         return False
     try:
-        with httpx.Client(transport=transport, timeout=5) as client:
+        with httpx.Client(transport=transport, timeout=3) as client:
             response = client.post(
                 settings.revalidate_url,
                 json={"tags": tags},

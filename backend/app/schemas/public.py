@@ -37,6 +37,12 @@ class ContactOut(Out):
     map_embed_url: str = ""
 
 
+class RedirectPublicOut(Out):
+    from_path: str
+    to_path: str
+    status_code: int
+
+
 class SeoSettingsOut(Out):
     default_title: str
     title_template: str

@@ -16,6 +16,8 @@ from pydantic import (
 )
 from pydantic.alias_generators import to_camel
 
+from app.db.base import SLUG_REGEX
+
 
 class CamelModel(BaseModel):
     """JSON uses camelCase (like the website code); Python uses snake_case. Unknown fields are
@@ -219,3 +221,24 @@ RichDoc = Annotated[
 
 
 AltText = _line(300)  # what a picture shows, for people who cannot see it (and for search engines)
+
+
+def _paragraph(max_length: int) -> Any:
+    return Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1, max_length=max_length),
+        AfterValidator(_many_lines),
+    ]
+
+
+Summary = _paragraph(400)  # the short text of a news item or a course
+LongSummary = _paragraph(500)
+SeoTitle = _line(120)
+SeoDescription = _line(300)
+Slug = Annotated[str, StringConstraints(min_length=1, max_length=120, pattern=SLUG_REGEX)]
+EMAIL_REGEX = r"^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$"
+Email = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, to_lower=True, max_length=254, pattern=EMAIL_REGEX),
+]
+Id = Annotated[int, Field(gt=0, strict=True)]  # a database id: a real number, never "7" or true

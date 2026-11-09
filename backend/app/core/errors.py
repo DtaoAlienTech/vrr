@@ -4,7 +4,9 @@
 from typing import Any
 
 from fastapi import Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 
 
 class ApiError(Exception):
@@ -29,4 +31,27 @@ async def api_error_handler(_: Request, error: ApiError) -> JSONResponse:
         {"detail": error.detail, "code": error.code, **error.extra},
         status_code=error.status_code,
         headers=error.headers,
+    )
+
+
+def field_errors(error: ValidationError | RequestValidationError) -> list[dict[str, str]]:
+    """One entry per problem: which field and what is wrong (the value itself is never echoed)."""
+    problems = []
+    for item in error.errors():
+        location = list(item["loc"])
+        if isinstance(error, RequestValidationError):
+            location = location[1:]  # drop "body" / "query" / "path": where the field was sent
+        field = ".".join(str(part) for part in location)
+        problems.append({"field": field, "message": str(item["msg"])})
+    return problems
+
+
+async def validation_error_handler(_: Request, error: RequestValidationError) -> JSONResponse:
+    return JSONResponse(
+        {
+            "detail": "Please check the fields marked below.",
+            "code": "validation_error",
+            "errors": field_errors(error),
+        },
+        status_code=422,
     )

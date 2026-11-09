@@ -56,6 +56,15 @@ docker compose exec backend python -m app.cli reset-password --email you@college
 
 Passwords need at least 12 characters. Super admins must turn on two-factor login (an authenticator app) the first time they sign in; five wrong passwords lock an account for 15 minutes.
 
+### Staff API (what the admin panel uses)
+
+All under `/api/v1/admin`, for signed-in staff (with the CSRF token on every change): `media`, `news`, `activities`, `gallery`, `courses`, `departments`, `faculty`, `pages` (and their `sections`), `redirects`, `revisions` (history and undo), `enquiries` (and `enquiries/export.csv`). Super admins only: `settings`, `users`, `audit-log`, and creating or deleting courses and departments. In development the interactive list is at http://localhost:3000/api/docs.
+
+```bash
+docker compose exec backend python -m app.cli reset-two-factor --email you@college.example   # lost phone
+docker compose exec backend python -m app.cli purge-enquiries --days 365 --dry-run           # privacy: old enquiries
+```
+
 ### Secrets
 
 `.env` holds the secrets and is never committed. Make a strong value for each `CHANGE_ME`:
