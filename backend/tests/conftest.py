@@ -1,10 +1,13 @@
 from collections.abc import Iterator
 
 import pytest
+from argon2 import PasswordHasher
 from fastapi.testclient import TestClient
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
+from app.core import security
+from app.core.config import get_settings
 from app.db.session import engine, get_db
 from app.main import app
 from app.models import (
@@ -22,6 +25,7 @@ from app.models import (
     PageSection,
     Redirect,
     SiteSetting,
+    User,
 )
 from app.seed.loader import load_seed
 
@@ -90,3 +94,49 @@ def seeded(empty_content: Session, tmp_path) -> Session:
     """The starter content, loaded into the empty state (photo files go to a temporary folder)."""
     load_seed(empty_content, tmp_path)
     return empty_content
+
+
+PASSWORD = "correct horse battery staple"
+
+
+@pytest.fixture(autouse=True)
+def _fast_password_hashing(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Argon2 is slow on purpose. Tests use the cheapest settings so the suite stays fast; the
+    real settings are checked separately in test_security_core.py."""
+    monkeypatch.setattr(
+        security, "_hasher", PasswordHasher(time_cost=1, memory_cost=8, parallelism=1)
+    )
+    monkeypatch.setattr(security, "_DUMMY_HASH", security.hash_password("not-a-real-password"))
+
+
+@pytest.fixture
+def make_user(db_session: Session):
+    """Creates a staff account (rolled back after the test)."""
+
+    def create(
+        email: str = "staff@example.org",
+        *,
+        role: str = "editor",
+        password: str = PASSWORD,
+        name: str = "Staff Person",
+        **extra,
+    ) -> User:
+        user = User(
+            email=email, name=name, password_hash=security.hash_password(password), role=role,
+            **extra,
+        )  # fmt: skip
+        db_session.add(user)
+        db_session.flush()
+        return user
+
+    return create
+
+
+@pytest.fixture
+def proxied(monkeypatch: pytest.MonkeyPatch):
+    """One trusted proxy in front of the API, so a test can pretend to be different visitors with
+    the X-Forwarded-For header."""
+    monkeypatch.setenv("TRUSTED_PROXY_HOPS", "1")
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()

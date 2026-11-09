@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, String, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, IdMixin, TimestampMixin, check_in
@@ -28,6 +29,10 @@ class User(IdMixin, TimestampMixin, Base):
     # Two-factor secret, stored encrypted (never in clear text).
     totp_secret: Mapped[str | None] = mapped_column(String(255))
     totp_enabled: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
+    # The 30-second time step of the last accepted code: the same code cannot be used twice.
+    totp_last_step: Mapped[int | None] = mapped_column(BigInteger)
+    # SHA-256 hashes of the unused one-time recovery codes (the codes themselves are shown once).
+    recovery_codes: Mapped[list[str]] = mapped_column(JSONB, server_default=text("'[]'::jsonb"))
 
 
 class UserSession(IdMixin, TimestampMixin, Base):

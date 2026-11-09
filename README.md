@@ -40,6 +40,17 @@ Only Caddy (port 3000) and the database (localhost:5433) are reachable from the 
 
 Photos and PDFs live in the `uploads` volume: the backend writes them and Caddy serves them at `/uploads/...`. The starter content is added only when the database has no pages (`SEED_ON_START=0` in `.env` turns that off; `docker compose exec backend python -m app.cli seed --if-empty` runs it by hand). The texts marked "Sample" in it are placeholders and must be replaced before launch.
 
+### First admin account
+
+Create the first super admin once (it asks for the password on the keyboard; it is never stored in clear text):
+
+```bash
+docker compose exec backend python -m app.cli create-admin --email you@college.example --name "Your Name"
+docker compose exec backend python -m app.cli reset-password --email you@college.example   # if it is ever lost
+```
+
+Passwords need at least 12 characters. Super admins must turn on two-factor login (an authenticator app) the first time they sign in; five wrong passwords lock an account for 15 minutes.
+
 ### Secrets
 
 `.env` holds the secrets and is never committed. Make a strong value for each `CHANGE_ME`:

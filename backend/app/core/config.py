@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # backend/app/core/config.py -> repo root is three levels above this folder
@@ -26,6 +26,15 @@ class Settings(BaseSettings):
     # than the real number of proxies, or visitors could fake their address.
     trusted_proxy_hops: int = Field(default=0, ge=0, le=5)
 
+    # Admin login. Short access token, longer refresh token that is replaced on every use.
+    access_token_minutes: int = Field(default=15, ge=1, le=120)
+    refresh_token_days: int = Field(default=7, ge=1, le=90)
+    # Cookies are "Secure" (https only) in production. Set COOKIE_SECURE=true/false to override.
+    cookie_secure: bool | None = None
+    cookie_domain: str | None = None
+    # Name shown in the authenticator app next to the six-digit code.
+    totp_issuer: str = "VRR Degree College"
+
     # Where uploaded photos and PDFs are stored. In Docker this is a shared volume that Caddy also
     # serves at /uploads. The website builds picture addresses from `uploads_url`.
     upload_dir: Path = ROOT / "uploads"
@@ -42,6 +51,16 @@ class Settings(BaseSettings):
     smtp_user: str = ""
     smtp_password: SecretStr | None = None
     mail_from: str = ""
+
+    @model_validator(mode="after")
+    def _strong_key_in_production(self) -> "Settings":
+        if self.env == "prod" and len(self.secret_key) < 32:
+            raise ValueError("SECRET_KEY must be at least 32 characters in production")
+        return self
+
+    @property
+    def cookies_secure(self) -> bool:
+        return self.is_prod if self.cookie_secure is None else self.cookie_secure
 
     @property
     def is_prod(self) -> bool:

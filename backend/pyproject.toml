@@ -17,6 +17,11 @@ dependencies = [
   "pydantic>=2.8",
   "pydantic-settings>=2.4",
   "httpx>=0.27",
+  # admin login: Argon2id passwords, signed access tokens, two-factor codes, encrypted 2FA secrets
+  "argon2-cffi>=25.1",
+  "PyJWT>=2.10",
+  "pyotp>=2.9",
+  "cryptography>=45",
 ]
 
 [project.optional-dependencies]

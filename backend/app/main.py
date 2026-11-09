@@ -6,6 +6,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
+from app.core.errors import ApiError, api_error_handler
+from app.core.logging import configure_logging, new_request_id, request_id_var
 
 # Safe defaults on every response. Endpoints may override (for example public GET caching).
 SECURITY_HEADERS = {
@@ -19,6 +21,7 @@ SECURITY_HEADERS = {
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    configure_logging()
     app = FastAPI(
         title="VRR College API",
         version="0.1.0",
@@ -28,12 +31,16 @@ def create_app() -> FastAPI:
         redoc_url=None,
     )
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_host_list)
+    app.add_exception_handler(ApiError, api_error_handler)  # type: ignore[arg-type]
 
     @app.middleware("http")
     async def security_headers(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
+        request_id = new_request_id(request.headers.get("x-request-id"))
+        request_id_var.set(request_id)
         response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
         for name, value in SECURITY_HEADERS.items():
             response.headers.setdefault(name, value)
         return response
