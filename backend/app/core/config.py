@@ -39,6 +39,13 @@ class Settings(BaseSettings):
     # serves at /uploads. The website builds picture addresses from `uploads_url`.
     upload_dir: Path = ROOT / "uploads"
     uploads_url: str = "/uploads"
+    # The photos exactly as they were uploaded (they may contain location data). Never served.
+    originals_dir: Path = ROOT / "originals"
+    max_upload_mb: int = Field(default=10, ge=1, le=50)
+
+    # After a change in the admin, the backend tells the website which cached pages are out of date.
+    revalidate_url: str = ""
+    revalidate_secret: SecretStr | None = None
 
     # Enquiry form
     enquiry_to_email: str = ""
@@ -57,6 +64,10 @@ class Settings(BaseSettings):
         if self.env == "prod" and len(self.secret_key) < 32:
             raise ValueError("SECRET_KEY must be at least 32 characters in production")
         return self
+
+    @property
+    def max_upload_bytes(self) -> int:
+        return self.max_upload_mb * 1024 * 1024
 
     @property
     def cookies_secure(self) -> bool:

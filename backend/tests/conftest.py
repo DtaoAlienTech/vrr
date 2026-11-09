@@ -92,7 +92,7 @@ def empty_content(db_session: Session) -> Session:
 @pytest.fixture
 def seeded(empty_content: Session, tmp_path) -> Session:
     """The starter content, loaded into the empty state (photo files go to a temporary folder)."""
-    load_seed(empty_content, tmp_path)
+    load_seed(empty_content, tmp_path, make_copies=False)  # (resizing every test would be slow)
     return empty_content
 
 

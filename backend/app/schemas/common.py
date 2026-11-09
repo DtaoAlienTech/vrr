@@ -216,3 +216,6 @@ RichDoc = Annotated[
     AfterValidator(check_rich_doc),
     WithJsonSchema({"type": "object", "x-widget": "richtext"}),
 ]
+
+
+AltText = _line(300)  # what a picture shows, for people who cannot see it (and for search engines)

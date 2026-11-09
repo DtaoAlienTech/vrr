@@ -11,7 +11,17 @@
 	}
 
 	# Caddy overwrites X-Forwarded-For with the real visitor address, so visitors cannot fake it.
+	# Uploads may be large (keep this a little above MAX_UPLOAD_MB); every other request body is small.
+	handle /api/v1/admin/media* {
+		request_body {
+			max_size 12MB
+		}
+		reverse_proxy backend:8000
+	}
 	handle /api/* {
+		request_body {
+			max_size 1MB
+		}
 		reverse_proxy backend:8000
 	}
 

@@ -38,7 +38,12 @@ docker compose down -v                # ... and DELETE the database data too
 
 Only Caddy (port 3000) and the database (localhost:5433) are reachable from the host. The backend and the website have no published ports.
 
-Photos and PDFs live in the `uploads` volume: the backend writes them and Caddy serves them at `/uploads/...`. The starter content is added only when the database has no pages (`SEED_ON_START=0` in `.env` turns that off; `docker compose exec backend python -m app.cli seed --if-empty` runs it by hand). The texts marked "Sample" in it are placeholders and must be replaced before launch.
+Photos and PDFs live in the `uploads` volume: the backend writes them and Caddy serves them at `/uploads/...`. Every uploaded photo is checked (real file type, at most 6000 px and `MAX_UPLOAD_MB`), turned upright, stripped of camera data and GPS location, and saved as WebP copies 400, 800, 1200 and 1600 px wide. The photo exactly as uploaded is kept in the private `originals` volume. A photo that is still used on a page cannot be deleted.
+
+```bash
+docker compose exec backend python -m app.cli media-reprocess     # resized copies for photos that lack them (runs at every start)
+docker compose exec backend python -m app.cli media-cleanup --dry-run   # list files no library entry refers to (drop --dry-run to delete them)
+``` The starter content is added only when the database has no pages (`SEED_ON_START=0` in `.env` turns that off; `docker compose exec backend python -m app.cli seed --if-empty` runs it by hand). The texts marked "Sample" in it are placeholders and must be replaced before launch.
 
 ### First admin account
 

@@ -32,6 +32,15 @@ def record(
     )
 
 
+def recent_user_count(db: Session, action: str, user_id: int, *, seconds: int) -> int:
+    """How many times this person did `action` in the last `seconds` seconds."""
+    since = func.now() - text(f"interval '{int(seconds)} seconds'")
+    stmt = select(func.count()).where(
+        AuditLog.action == action, AuditLog.user_id == user_id, AuditLog.created_at >= since
+    )
+    return db.scalar(stmt) or 0
+
+
 def recent_count(db: Session, action: str, ip: str, *, seconds: int) -> int:
     """How many times `action` was recorded for this address in the last `seconds` seconds."""
     since = func.now() - text(f"interval '{int(seconds)} seconds'")

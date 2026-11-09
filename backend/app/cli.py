@@ -3,6 +3,8 @@
   python -m app.cli seed [--if-empty]            starter content for an empty database
   python -m app.cli create-admin --email ...     first (or another) staff account
   python -m app.cli reset-password --email ...   new password; also unlocks and signs out everywhere
+  python -m app.cli media-reprocess [--all]      make the resized copies of photos that lack them
+  python -m app.cli media-cleanup [--dry-run]    delete files that no library entry refers to
 
 Passwords are asked for on the keyboard (never as an argument, which shell history would keep).
 For scripts, set the ADMIN_PASSWORD environment variable instead.
@@ -19,11 +21,12 @@ from sqlalchemy import select
 from app.core import security
 from app.core.config import get_settings
 from app.db.session import SessionLocal
-from app.models import User
+from app.models import Media, User
 from app.models.enums import Role
 from app.seed.loader import is_empty, load_seed
-from app.services import audit
+from app.services import audit, revalidate
 from app.services.auth import revoke_all_sessions
+from app.services.media import Storage, cleanup_orphans, reprocess_media
 
 _EMAIL = re.compile(r"^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$")
 
@@ -107,6 +110,40 @@ def reset_password(*, email: str) -> int:
     return 0
 
 
+def media_reprocess(*, everything: bool) -> int:
+    settings = get_settings()
+    storage = Storage.from_settings(settings)
+    done = failed = 0
+    with SessionLocal() as db:
+        for row in db.scalars(select(Media).where(Media.kind == "image").order_by(Media.id)):
+            if row.variants and not everything:
+                continue
+            if reprocess_media(row, storage):
+                done += 1
+            else:
+                failed += 1
+        db.commit()
+    print(f"Resized copies made for {done} photo(s); {failed} could not be processed.")
+    if done:
+        revalidate.notify(settings, revalidate.ALL_TAGS)  # the website shows the new copies
+    return 1 if failed else 0
+
+
+def media_cleanup(*, dry_run: bool, min_age_minutes: int) -> int:
+    with SessionLocal() as db:
+        removed = cleanup_orphans(
+            db,
+            Storage.from_settings(get_settings()),
+            min_age_seconds=min_age_minutes * 60,
+            dry_run=dry_run,
+        )
+    verb = "Would remove" if dry_run else "Removed"
+    print(f"{verb} {len(removed)} file(s).")
+    for path in removed:
+        print(" ", path.name)
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -126,9 +163,24 @@ def main() -> int:
     reset_parser = commands.add_parser("reset-password", help="set a new password for an account")
     reset_parser.add_argument("--email", required=True)
 
+    reprocess_parser = commands.add_parser("media-reprocess", help="make resized photo copies")
+    reprocess_parser.add_argument(
+        "--all", action="store_true", help="redo every photo, not only those without copies"
+    )
+
+    cleanup_parser = commands.add_parser("media-cleanup", help="delete unreferenced files")
+    cleanup_parser.add_argument("--dry-run", action="store_true", help="only list the files")
+    cleanup_parser.add_argument(
+        "--min-age-minutes", type=int, default=60, help="keep newer files (uploads in progress)"
+    )
+
     args = parser.parse_args()
     if args.command == "seed":
         return seed(if_empty=args.if_empty)
+    if args.command == "media-reprocess":
+        return media_reprocess(everything=args.all)
+    if args.command == "media-cleanup":
+        return media_cleanup(dry_run=args.dry_run, min_age_minutes=args.min_age_minutes)
     if args.command == "create-admin":
         return create_admin(email=args.email, name=args.name, role=args.role)
     return reset_password(email=args.email)

@@ -56,14 +56,18 @@ services:
       MAIL_FROM: ${MAIL_FROM:-}
       REVALIDATE_URL: http://frontend:3000/internal/revalidate
       REVALIDATE_SECRET: ${REVALIDATE_SECRET:?Set REVALIDATE_SECRET in .env}
-      # Photos and PDFs are saved here (a volume Caddy also reads).
+      # Photos and PDFs are saved here (a volume Caddy also reads) ...
       UPLOAD_DIR: /data/uploads
+      # ... and the photos exactly as uploaded are kept here (private: never served).
+      ORIGINALS_DIR: /data/originals
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
       # 1 = add the starter content when the database is empty (never touches existing content)
       SEED_ON_START: ${SEED_ON_START:-1}
     volumes:
       - uploads:/data/uploads
+      - originals:/data/originals
     # No published port: the only way in is through Caddy.
-    # Hardening: read-only filesystem (only the uploads volume is writable), no extra privileges.
+    # Hardening: read-only filesystem (only the two upload volumes are writable), no extra privileges.
     read_only: true
     tmpfs:
       - /tmp
@@ -122,6 +126,7 @@ services:
 volumes:
   pgdata:
   uploads:
+  originals:
   next_build:
   caddy_data:
   caddy_config:

@@ -27,6 +27,7 @@ from app.models import (
 from app.schemas.blocks import validate_section
 from app.schemas.common import check_rich_doc
 from app.schemas.settings import validate_settings
+from app.services.media import Storage, reprocess_media
 
 SEED_DIR = Path(__file__).parent
 _PUBLISHED = "published"
@@ -51,8 +52,9 @@ def _published_at(day: str) -> datetime:
     return datetime.fromisoformat(f"{day}T09:00:00+05:30")  # 9 am India time
 
 
-def load_seed(db: Session, upload_dir: Path) -> dict[str, int]:
-    """Adds the starter content (no commit). Raises if content already exists."""
+def load_seed(db: Session, upload_dir: Path, *, make_copies: bool = True) -> dict[str, int]:
+    """Adds the starter content (no commit). Raises if content already exists.
+    `make_copies` also creates the resized WebP copies of the photos (tests skip it for speed)."""
     if not is_empty(db):
         raise RuntimeError(
             "The database already has pages; the starter content is not added again."
@@ -79,6 +81,8 @@ def load_seed(db: Session, upload_dir: Path) -> dict[str, int]:
         )
         db.add(row)
         db.flush()
+        if make_copies:
+            reprocess_media(row, Storage(upload_dir, None))
         ids[item["key"]] = row.id
 
     # ---- site settings ----

@@ -22,6 +22,9 @@ dependencies = [
   "PyJWT>=2.10",
   "pyotp>=2.9",
   "cryptography>=45",
+  # photo and PDF uploads: Pillow reads and resizes images, python-multipart reads the upload
+  "Pillow>=12",
+  "python-multipart>=0.0.20",
 ]
 
 [project.optional-dependencies]
