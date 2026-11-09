@@ -11,11 +11,19 @@ from app.models.enquiry import Enquiry
 
 
 def client_ip(request: Request, settings: Settings) -> str:
-    """The visitor's IP. X-Forwarded-For is trusted only when we run behind our own proxy."""
-    if settings.trust_proxy:
-        first = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
-        if first:
-            return first
+    """The visitor's IP address.
+
+    X-Forwarded-For is a list: the visitor can write anything at the start, and each of our own
+    proxies appends the address it saw at the end. So with N trusted proxies the real address is
+    the N-th entry from the RIGHT. Entries further left are visitor-controlled and are ignored.
+    """
+    hops = settings.trusted_proxy_hops
+    if hops:
+        parts = [
+            p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()
+        ]
+        if len(parts) >= hops:
+            return parts[-hops]
     return request.client.host if request.client else "unknown"
 
 

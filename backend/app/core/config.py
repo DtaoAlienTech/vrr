@@ -21,8 +21,10 @@ class Settings(BaseSettings):
     secret_key: str = Field(min_length=16)
     allowed_hosts: str = "localhost,127.0.0.1"
     api_prefix: str = "/api/v1"
-    # Set to true only behind our own reverse proxy (Caddy), so X-Forwarded-For can be trusted.
-    trust_proxy: bool = False
+    # How many of our own reverse proxies (Next.js proxy, Caddy) sit in front of the API. Each one
+    # appends the address it saw to X-Forwarded-For. 0 = ignore that header. Never set this higher
+    # than the real number of proxies, or visitors could fake their address.
+    trusted_proxy_hops: int = Field(default=0, ge=0, le=5)
 
     # Enquiry form
     enquiry_to_email: str = ""

@@ -1,0 +1,23 @@
+# The single entry point. In production the address below becomes the real domain
+# (for example vrrcollege.in) and Caddy gets the HTTPS certificate by itself (Phase 5).
+:8080 {
+	encode zstd gzip
+
+	# "handle" blocks are tried top to bottom and only the first match runs, so the order matters.
+
+	# The cache-refresh hook is for the backend only, never for the internet.
+	handle /internal/* {
+		respond 404
+	}
+
+	# Caddy overwrites X-Forwarded-For with the real visitor address, so visitors cannot fake it.
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+
+	header -Server
+}

@@ -1,5 +1,15 @@
-# Development services. Backend and frontend run on the host for hot reload.
-# Production adds backend, frontend and caddy in docker-compose.prod.yml (Phase 5).
+# One command builds and starts everything:
+#
+#   docker compose up -d --build        then open http://localhost:3000
+#
+# caddy    The single entry point: /api goes to the backend, everything else to the website
+# frontend Next.js website
+# backend  FastAPI. Applies database migrations on start, then serves /api
+# db       PostgreSQL (also usable alone for local development: docker compose up -d db)
+#
+# Settings come from the .env file next to this one (copy .env.example and replace CHANGE_ME).
+name: vrr-college
+
 services:
   db:
     image: pgvector/pgvector:pg16
@@ -20,5 +30,86 @@ services:
       timeout: 3s
       retries: 12
 
+  backend:
+    build: ./backend
+    container_name: vrr-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENV: ${ENV:-dev}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-vrr}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-vrr}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
+      # "backend" is the name the other containers use to reach this one.
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1},backend
+      # Caddy is the one proxy in front of the API and adds the visitor's real address.
+      TRUSTED_PROXY_HOPS: "1"
+      ENQUIRY_TO_EMAIL: ${ENQUIRY_TO_EMAIL:-}
+      ENQUIRY_RATE_LIMIT_PER_HOUR: ${ENQUIRY_RATE_LIMIT_PER_HOUR:-5}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      REVALIDATE_URL: http://frontend:3000/internal/revalidate
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:?Set REVALIDATE_SECRET in .env}
+    # No published port: the only way in is through Caddy.
+    # Hardening: read-only filesystem, no extra privileges.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        SITE_URL: ${SITE_URL:-http://localhost:3000}
+        BACKEND_URL: http://backend:8000
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+    container_name: vrr-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:?Set REVALIDATE_SECRET in .env}
+    # No published port: the only way in is through Caddy.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: vrr-caddy
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 4s
+      retries: 6
+      start_period: 10s
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:

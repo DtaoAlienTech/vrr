@@ -58,3 +58,14 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm audit --omit=dev --audit-level=high
+
+  docker-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create a throw-away .env (placeholders, not real secrets)
+        run: |
+          cp .env.example .env
+          sed -i 's/CHANGE_ME/ci-placeholder-value-not-a-secret/' .env
+      - name: Build both images
+        run: docker compose build

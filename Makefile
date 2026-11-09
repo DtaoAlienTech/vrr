@@ -1,10 +1,19 @@
-.PHONY: db db-down backend frontend migrate test lint typecheck check
+.PHONY: up down logs db db-down backend frontend migrate test lint typecheck check
+
+up:
+	docker compose up -d --build
+
+down:
+	docker compose down
+
+logs:
+	docker compose logs -f
 
 db:
 	docker compose up -d db
 
 db-down:
-	docker compose down
+	docker compose stop db
 
 backend:
 	cd backend && .venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
