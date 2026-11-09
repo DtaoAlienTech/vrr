@@ -5,19 +5,33 @@ const PATHS = {
   mail: "M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z",
 } as const;
 
-export type IconName = keyof typeof PATHS | "menu";
+// Line icons (drawn with a stroke instead of a filled shape).
+const LINES = {
+  menu: "M3 6h18M3 12h18M3 18h18",
+  chevron: "M5 9l7 7 7-7",
+} as const;
+
+export type IconName = keyof typeof PATHS | keyof typeof LINES;
 
 export function Icon({ name }: { name: IconName }) {
-  if (name === "menu") {
+  if (name in LINES) {
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-        <path d="M3 6h18M3 12h18M3 18h18" />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d={LINES[name as keyof typeof LINES]} />
       </svg>
     );
   }
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d={PATHS[name]} />
+      <path d={PATHS[name as keyof typeof PATHS]} />
     </svg>
   );
 }

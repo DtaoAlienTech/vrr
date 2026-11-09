@@ -295,3 +295,33 @@ a.doc:hover{border-color:var(--primary)}
 .note-error{font-weight:600}
 .formbox .note-error{color:#b42318}
 .band .note-error{color:#ffd1cc}
+
+/* Home hero: full-screen photo with the text on top */
+.hero.hero-cover{position:relative;padding:0;display:flex;align-items:center;overflow:hidden;background:var(--navy);color:#fff;min-height:clamp(540px,calc(100vh - 104px),860px);min-height:clamp(540px,calc(100svh - 104px),860px)}
+.hero.hero-cover .wrap{display:block}
+.hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:62% 14%}
+.hero-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,31,63,.6) 0%,rgba(11,31,63,.82) 100%)}
+.hero-inner{position:relative;padding-top:56px;padding-bottom:56px}
+.hero-cover .hero-copy{max-width:620px}
+.hero-cover h1{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.hero-cover h1 em{color:#FFC857}
+.hero-cover .eyebrow{color:#FFD58A}
+.hero-cover .lead{color:#e8eef9}
+.hero-cover .btn-ghost{border-color:#fff;color:#fff;background:transparent}
+.hero-cover .btn-ghost:hover{background:rgba(255,255,255,.14)}
+@media(min-width:900px){
+  .hero-shade{background:linear-gradient(90deg,rgba(11,31,63,.93) 0%,rgba(11,31,63,.8) 34%,rgba(11,31,63,.28) 66%,rgba(11,31,63,0) 100%)}
+  .hero-inner{padding-top:72px;padding-bottom:72px}
+}
+
+/* "Scroll down" cue at the bottom of the home hero */
+.anchor{display:block;height:0;scroll-margin-top:72px}
+.scroll-cue{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;color:#fff;text-decoration:none;font:500 .76rem var(--font);letter-spacing:.16em;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.5);padding:8px 14px}
+.scroll-cue svg{width:26px;height:26px;animation:cue-bounce 1.6s ease-in-out infinite}
+.scroll-cue:hover{color:#FFC857}
+@media(min-width:820px){.scroll-cue{bottom:26px}}
+@keyframes cue-bounce{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(8px);opacity:1}}
+@media(prefers-reduced-motion:reduce){.scroll-cue svg{animation:none}}
+/* keep the hero text clear of the cue (phones: also clear of the bottom Enquire bar) */
+.hero-cover .hero-inner{padding-bottom:168px}
+@media(min-width:820px){.hero-cover .hero-inner{padding-bottom:104px}}
